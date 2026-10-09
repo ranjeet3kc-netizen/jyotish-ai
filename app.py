@@ -183,40 +183,42 @@ def render_north_indian_chart(asc_sign, planet_signs, title):
     import io
 
 def generate_pdf_report(name, dob_str, place_str, asc_sign_name, moon_sign_name, active_md, active_ad, yoga_list, rows_data=None, fig_chart=None, dasha_rows=None):
-    pdf = FPDF()
+    pdf = FPDF(orientation='P', unit='mm', format='A4')
+    pdf.set_margins(left=15, top=15, right=15)
     pdf.add_page()
-    pdf.set_auto_page_break(auto=True, margin=15)
     
     # Header
     pdf.set_font("Helvetica", "B", 14)
-    pdf.cell(0, 8, "JYOTISH AI - DETAILED HOROSCOPE REPORT", ln=True, align="C")
-    pdf.ln(4)
+    pdf.cell(180, 10, "JYOTISH AI - DETAILED HOROSCOPE REPORT", ln=True, align="C")
+    pdf.ln(5)
 
     # Basic Info
     pdf.set_font("Helvetica", "B", 11)
-    pdf.cell(0, 7, "Personal & Birth Details:", ln=True)
+    pdf.cell(180, 8, "Personal & Birth Details:", ln=True)
     pdf.set_font("Helvetica", "", 10)
     
-    # Using multi_cell to prevent space errors
-    pdf.multi_cell(0, 6, f"Name: {name}")
-    pdf.multi_cell(0, 6, f"Date of Birth: {dob_str}")
-    pdf.multi_cell(0, 6, f"Place of Birth: {place_str}")
-    pdf.multi_cell(0, 6, f"Lagna Rashi (Ascendant): {asc_sign_name}")
-    pdf.multi_cell(0, 6, f"Moon Rashi: {moon_sign_name}")
-    pdf.multi_cell(0, 6, f"Current Active Dasha: {active_md} Mahadasha - {active_ad} Antardasha")
-    pdf.ln(4)
+    pdf.multi_cell(180, 6, f"Name: {name}")
+    pdf.multi_cell(180, 6, f"Date of Birth: {dob_str}")
+    pdf.multi_cell(180, 6, f"Place of Birth: {place_str}")
+    pdf.multi_cell(180, 6, f"Lagna Rashi (Ascendant): {asc_sign_name}")
+    pdf.multi_cell(180, 6, f"Moon Rashi: {moon_sign_name}")
+    pdf.multi_cell(180, 6, f"Current Active Dasha: {active_md} Mahadasha - {active_ad} Antardasha")
+    pdf.ln(5)
 
     # Yogas Section
     pdf.set_font("Helvetica", "B", 11)
-    pdf.cell(0, 7, "Key Yogas & Horoscope Analysis:", ln=True)
+    pdf.cell(180, 8, "Key Yogas & Horoscope Analysis:", ln=True)
     pdf.set_font("Helvetica", "", 10)
-    for y in yoga_list:
-        clean_y = str(y).encode('ascii', 'ignore').decode('ascii')
-        pdf.multi_cell(0, 6, f"- {clean_y}")
+    if yoga_list:
+        for y in yoga_list:
+            clean_y = str(y).encode('ascii', 'ignore').decode('ascii')
+            pdf.multi_cell(180, 6, f"- {clean_y}")
+    else:
+        pdf.multi_cell(180, 6, "- General auspicious yoga present.")
     
-    pdf.ln(4)
+    pdf.ln(5)
     pdf.set_font("Helvetica", "I", 9)
-    pdf.cell(0, 6, "Generated successfully by Jyotish AI Engine.", ln=True, align="C")
+    pdf.cell(180, 6, "Generated successfully by Jyotish AI Engine.", ln=True, align="C")
 
     return pdf.output()
     
