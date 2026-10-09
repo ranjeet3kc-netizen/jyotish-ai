@@ -203,10 +203,7 @@ if submitted:
         from matplotlib.patches import Polygon
 
         fig, ax = plt.subplots(figsize=(7, 7))
-        from matplotlib import font_manager
-
-font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
-hindi_font = font_manager.FontProperties(fname=font_path)
+        
         # Outer square
         ax.plot(
             [0, 1, 1, 0, 0],
