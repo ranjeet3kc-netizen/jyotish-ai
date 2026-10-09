@@ -6,6 +6,7 @@ from geopy.geocoders import Nominatim
 from timezonefinder import TimezoneFinder
 import zoneinfo
 from fpdf import FPDF
+import io
 
 # Initialize Swiss Ephemeris Settings (Lahiri Ayanamsha)
 swe.set_sid_mode(swe.SIDM_LAHIRI)
@@ -107,6 +108,24 @@ MAHADASHA_PREDICTIONS = {
     "Ketu": "केतु की महादशा आध्यात्म, गुप्त विद्याओं, शोध और आत्म-साक्षात्कार का काल है। अंतर्दृष्टि मजबूत होती है।"
 }
 
+# --- नवमांश (D9) कैलकुलेशन फंक्शन ---
+def get_navamsha_sign(abs_degree):
+    abs_degree = abs_degree % 360
+    d1_sign = int(abs_degree // 30)
+    sign_degree = abs_degree % 30
+    navamsha_num = int(sign_degree // (30 / 9))
+
+    if d1_sign in [0, 4, 8]:
+        start_sign = 0
+    elif d1_sign in [1, 5, 9]:
+        start_sign = 9
+    elif d1_sign in [2, 6, 10]:
+        start_sign = 6
+    else:
+        start_sign = 3
+
+    return (start_sign + navamsha_num) % 12
+
 def section_heading(title, icon="✨"):
     st.markdown(
         f"""
@@ -128,16 +147,13 @@ def section_heading(title, icon="✨"):
     )
 
 def render_north_indian_chart(asc_sign, planet_signs, title):
-    # चार्ट का साइज़ थोड़ा बेहतर किया ताकि टेक्स्ट साफ़ दिखे
     fig, ax = plt.subplots(figsize=(6, 6))
 
-    # आउटर बॉक्स और डायमंड लाइनें (0 से 1 स्केल पर)
     ax.plot([0, 1, 1, 0, 0], [0, 0, 1, 1, 0], color="maroon", lw=2)
     ax.plot([0, 0.5, 1, 0.5, 0], [0.5, 1, 0.5, 0, 0.5], color="maroon", lw=1.5)
     ax.plot([0, 1], [0, 1], color="maroon", lw=1.5)
     ax.plot([0, 1], [1, 0], color="maroon", lw=1.5)
 
-    # 12 खानों के एकदम सटीक केंद्र बिंदु (Coordinates)
     positions = [
         (0.50, 0.72), (0.25, 0.85), (0.15, 0.68),
         (0.25, 0.50), (0.15, 0.32), (0.25, 0.15),
@@ -146,12 +162,10 @@ def render_north_indian_chart(asc_sign, planet_signs, title):
     ]
 
     for i, (x, y) in enumerate(positions):
-        # घर का नंबर (1 से 12) - यहाँ i=0 मतलब पहला घर (लग्न)
         house_num = i + 1
         sign_index = (asc_sign + i) % 12
         planets_in_house = planet_signs.get(SIGNS[sign_index], [])
         
-        # अगर एक घर में ज़्यादा ग्रह हैं, तो उन्हें मैनेज करने का तरीका
         if len(planets_in_house) > 3:
             p_str = ", ".join(planets_in_house[:2]) + "\n" + ", ".join(planets_in_house[2:])
             font_size = 6
@@ -162,10 +176,8 @@ def render_north_indian_chart(asc_sign, planet_signs, title):
             p_str = "\n".join(planets_in_house) if planets_in_house else ""
             font_size = 7.5
 
-        # घर के अंदर राशि/भाव नंबर दिखाना (ऊपर की तरफ)
         ax.text(x, y + 0.08, f"H{house_num} [{SIGNS[sign_index][:3]}]", color="darkred", fontsize=8.5, weight="bold", ha="center")
         
-        # ग्रहों के नाम दिखाना (नीचे की तरफ)
         if p_str:
             ax.text(x, y - 0.04, p_str, color="navy", fontsize=font_size, ha="center", va="center")
 
@@ -174,10 +186,8 @@ def render_north_indian_chart(asc_sign, planet_signs, title):
     ax.axis("off")
     ax.set_title(title, fontsize=13, pad=12, color="maroon", weight="bold")
     return fig
-    
-    import io
 
-def generate_pdf_report(name, dob_str, place_str, asc_sign_name, moon_sign_name, active_md, active_ad, yoga_list, rows_data=None, fig_chart=None, dasha_rows=None):
+def generate_pdf_report(name, dob_str, place_str, asc_sign_name, moon_sign_name, active_md, active_ad, yoga_list):
     def clean_text(txt):
         if not txt:
             return ""
@@ -187,12 +197,10 @@ def generate_pdf_report(name, dob_str, place_str, asc_sign_name, moon_sign_name,
     pdf.set_margins(left=15, top=15, right=15)
     pdf.add_page()
     
-    # Header
     pdf.set_font("Helvetica", "B", 14)
     pdf.cell(180, 10, "JYOTISH AI - DETAILED HOROSCOPE REPORT", ln=True, align="C")
     pdf.ln(5)
 
-    # Basic Info with strict ASCII cleaning
     pdf.set_font("Helvetica", "B", 11)
     pdf.cell(180, 8, "Personal & Birth Details:", ln=True)
     pdf.set_font("Helvetica", "", 10)
@@ -205,7 +213,6 @@ def generate_pdf_report(name, dob_str, place_str, asc_sign_name, moon_sign_name,
     pdf.multi_cell(180, 6, clean_text(f"Current Active Dasha: {active_md} Mahadasha - {active_ad} Antardasha"))
     pdf.ln(5)
 
-    # Yogas Section
     pdf.set_font("Helvetica", "B", 11)
     pdf.cell(180, 8, "Key Yogas & Horoscope Analysis:", ln=True)
     pdf.set_font("Helvetica", "", 10)
@@ -220,9 +227,8 @@ def generate_pdf_report(name, dob_str, place_str, asc_sign_name, moon_sign_name,
     pdf.cell(180, 6, "Generated successfully by Jyotish AI Engine.", ln=True, align="C")
 
     return pdf.output()
-    
-    
-    # --- Page Setup ---
+
+# --- Page Setup ---
 st.set_page_config(page_title="Jyotish AI - विस्तृत महा जन्मपत्री", page_icon="🔱", layout="wide")
 
 st.markdown(
@@ -279,7 +285,6 @@ if submitted:
                 tf = TimezoneFinder()
                 tz_str = tf.timezone_at(lng=lon, lat=lat)
                 
-                # सही टाइमज़ोन कन्वर्जन
                 local_dt_naive = datetime.combine(dob, bt)
                 if tz_str:
                     tz_obj = zoneinfo.ZoneInfo(tz_str)
@@ -341,7 +346,6 @@ if submitted:
                     d1_planet_signs.setdefault(SIGNS[sign_index], []).append(planet_display)
                     d9_planet_signs.setdefault(SIGNS[d9_sign_index], []).append(planet_display)
 
-                # Ketu Calculation (180 degrees from Rahu)
                 rahu_res = swe.calc_ut(jd, swe.MEAN_NODE, flags)
                 rahu_deg = rahu_res[0][0] % 360
                 ketu_degree = (rahu_deg + 180) % 360
@@ -364,7 +368,7 @@ if submitted:
 
                 st.dataframe(rows, use_container_width=True)
 
-                # 2. CHARTS & LAGNA (Accurate Sidereal Ayanamsha)
+                # 2. CHARTS & LAGNA
                 ayanamsha = swe.get_ayanamsa_ut(jd)
                 res_houses = swe.houses(jd, lat, lon, b'P')
                 asc_tropical = res_houses[1][0]
@@ -387,7 +391,7 @@ if submitted:
                     st.pyplot(fig_d9)
                     plt.close(fig_d9)
 
-                # 3. DASHA & ANTARDASHA (Full 120-Year Life Cycle)
+                # 3. DASHA & ANTARDASHA
                 section_heading("3. महादशा एवं अंतर्दशा का विस्तृत फलादेश (Dasha Analysis)", "⏳")
 
                 moon_res = swe.calc_ut(jd, swe.MOON, flags)
@@ -409,7 +413,6 @@ if submitted:
                 active_ad = ""
                 all_md_rows = []
 
-                # कुल 14 चक्र लूप ताकि 100+ वर्ष के जातक की दशा कभी अधूरी न छूटे
                 for m_idx in range(14):
                     md_lord_i = (first_md_lord_idx + m_idx) % 9
                     md_name = DASHA_LORDS[md_lord_i]
@@ -441,7 +444,6 @@ if submitted:
                     })
                     current_start_date = md_end_date
 
-                    # यदि जातक की आयु 100 वर्ष पार हो जाए तो लूप रोकें
                     if (current_start_date - local_dt_naive).days > 365.25 * 105:
                         break
 
@@ -460,58 +462,8 @@ if submitted:
 
                 with st.expander("🏥 रोग प्रतिरोधक क्षमता एवं स्वास्थ्य सावधानियां", expanded=True):
                     st.write(f"• **षष्ठ भाव (रोग स्थान):** इस भाव में **{SIGNS[sixth_sign_idx]} ({SIGNS_HI[sixth_sign_idx]})** राशि है, जिसके स्वामी **{sixth_lord}** हैं।")
-                    st.write(f"• **स्वास्थ्य निर्देश:** {HEALTH_MAP.get(sixth_lord, 'सामान्य स्वास्थ्य उत्तम रहेगा। नियमित दिनचर्या रखें।')}")
+                    st.write(f"• **विशेष स्वास्थ्य सलाह:** {HEALTH_MAP.get(sixth_lord, 'नियमित योग और संतुलित जीवनशैली अपनाएं।')}आयुष्य और आरोग्यता के लिए खानपान पर ध्यान दें।")
 
-                # 5. LOVE & RELATIONSHIPS
-                section_heading("5. प्रेम, संबंध एवं वैवाहिक जीवन", "❤️")
-                fifth_sign_idx = (asc_sign + 4) % 12
-                fifth_lord = RASHI_LORDS[fifth_sign_idx]
-                seventh_sign_idx = (asc_sign + 6) % 12
-                seventh_lord = RASHI_LORDS[seventh_sign_idx]
-
-                with st.expander("❤️ प्रेम संबंध एवं वैवाहिक विश्लेषण", expanded=True):
-                    st.write(f"• **पंचमेश (बुद्धि व प्रेम):** {fifth_lord} — भावनात्मक समझ और संबंधों में ईमानदारी सहायक होगी।")
-                    st.write(f"• **सप्तमेश (दांपत्य जीवन):** {seventh_lord} — जीवनसाथी के साथ तालमेल बनाए रखने से गृहस्थ जीवन सुखद रहेगा।")
-
-                # 6. YOGAS & RAJYOGA ANALYSIS
-                section_heading("6. कुंडली में स्थित प्रमुख राजयोग एवं धनयोग", "👑")
-                detected_yogas = []
-
-                if planet_positions_map.get("Surya") == planet_positions_map.get("Budh"):
-                    detected_yogas.append("बुधादित्य योग (Budhaditya Yoga): सूर्य और बुध की युति से कुशाग्र बुद्धि, नेतृत्व क्षमता और मान-सम्मान प्राप्त होता है।")
-
-                guru_p = planet_positions_map.get("Guru")
-                chandra_p = planet_positions_map.get("Chandra")
-                if guru_p is not None and chandra_p is not None:
-                    # गजकेसरी योग: चंद्रमा से गुरु 1, 4, 7 या 10वें भाव में हो
-                    diff = (guru_p - chandra_p) % 12
-                    if diff in [0, 3, 6, 9]:
-                        detected_yogas.append("गजकेसरी योग (Gajakesari Yoga): गुरु और चंद्रमा का केंद्र संबंध असीम ज्ञान, प्रतिष्ठा और स्थायी समृद्धि प्रदान करता है।")
-
-                if not detected_yogas:
-                    detected_yogas.append("लग्न और केंद्र भावों का संबंध आपके जीवन को सतत प्रगतिशील बनाता है।")
-
-                for y in detected_yogas:
-                    st.success(f"• {y}")
-
-                # 7. REMEDIES & PDF DOWNLOAD
-                section_heading("7. शुभ रत्न, रुद्राक्ष एवं उपाय (Remedies)", "💎")
-                lagna_lord = RASHI_LORDS[asc_sign]
-                st.write(f"• **जीवनरत्न (Lagna Gemstone):** `{GEMSTONES.get(lagna_lord, 'नेचुरल ओपल')}`")
-                st.write(f"• **शुभ रुद्राक्ष:** **{RUDRAKSHA.get(lagna_lord, '5 मुखी रुद्राक्ष')}**")
-
-                st.markdown("---")
-                pdf_bytes = generate_pdf_report(
-                    name, dob.strftime("%Y-%m-%d"), location.address,
-                    SIGNS[asc_sign], SIGNS[moon_sign_idx],
-                    active_md, active_ad, detected_yogas
-                )
-                st.download_button(
-                    label="📄 Download Complete Kundli PDF Report",
-                    data=bytes(pdf_bytes),
-                    file_name=f"{name}_Jyotish_Report.pdf",
-                    mime="application/pdf"
-                )
-
-        except Exception as e:
-            st.error(f"Calculation error: {e}")
+                # PDF Download Button
+                section_heading("5. जन्मपत्री रिपोर्ट डाउनलोड (PDF Download)", "📥")
+                pdf_
