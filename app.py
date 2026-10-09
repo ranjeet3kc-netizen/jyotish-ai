@@ -74,15 +74,14 @@ with st.form("birth_form"):
 
 if submitted:
     try:
-                local_dt = datetime.combine(dob, bt)
+        local_dt = datetime.combine(dob, bt)
         utc_dt = local_dt - timedelta(hours=5, minutes=45)
 
         jd = swe.julday(
             utc_dt.year,
             utc_dt.month,
             utc_dt.day,
-            utc_dt.hour + utc_dt.minute / 60
-        )
+            utc_dt.hour + utc_dt.minute / 60)
 
         swe.set_sid_mode(swe.SIDM_LAHIRI)
         flags = swe.FLG_SWIEPH | swe.FLG_SIDEREAL
