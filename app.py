@@ -196,9 +196,9 @@ if submitted:
 
         import matplotlib.pyplot as plt
         import os
-import matplotlib.font_manager as fm
+        import matplotlib.font_manager as fm
 
-font_path = "/usr/share/fonts/truetype/noto/NotoSansDevanagari-Regular.ttf"
+        font_path = "/usr/share/fonts/truetype/noto/NotoSansDevanagari-Regular.ttf"
         from matplotlib.patches import Polygon
 
         fig, ax = plt.subplots(figsize=(7, 7))
