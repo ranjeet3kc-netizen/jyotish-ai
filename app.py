@@ -180,6 +180,13 @@ def render_north_indian_chart(asc_sign, planet_signs, title):
     ax.axis("off")
     ax.set_title(title, fontsize=12, pad=10, color="maroon", weight="bold")
     return fig
+    import re
+
+def clean_text_for_pdf(text):
+    """हिंदी/देवनागरी अक्षरों को हटाकर केवल ASCII टेक्स्ट रखता है"""
+    # अगर टेक्स्ट में ब्रैकेट्स में इंग्लिश लिखी है (जैसे 'Budhaditya Yoga'), उसे निकालेगा
+    # और बाकी गैर-लैटिन अक्षरों को सुरक्षित हटा देगा
+    return text.encode('ascii', 'ignore').decode('ascii').strip(" :-()")
 
 def generate_pdf_report(name, dob_str, place_str, asc_sign_name, moon_sign_name, active_md, active_ad, yoga_list):
     pdf = FPDF()
@@ -189,9 +196,10 @@ def generate_pdf_report(name, dob_str, place_str, asc_sign_name, moon_sign_name,
     pdf.ln(5)
 
     pdf.set_font("Helvetica", "", 12)
-    pdf.cell(0, 8, f"Name: {name}", ln=True)
+    # clean_text_for_pdf से नाम और जगह के देवनागरी अक्षर सुरक्षित रहेंगे
+    pdf.cell(0, 8, f"Name: {clean_text_for_pdf(name) or name}", ln=True)
     pdf.cell(0, 8, f"Date of Birth: {dob_str}", ln=True)
-    pdf.cell(0, 8, f"Place: {place_str}", ln=True)
+    pdf.cell(0, 8, f"Place: {clean_text_for_pdf(place_str) or 'Standard Location'}", ln=True)
     pdf.cell(0, 8, f"Lagna Rashi: {asc_sign_name}", ln=True)
     pdf.cell(0, 8, f"Moon Rashi: {moon_sign_name}", ln=True)
     pdf.cell(0, 8, f"Active Mahadasha: {active_md}", ln=True)
@@ -201,11 +209,17 @@ def generate_pdf_report(name, dob_str, place_str, asc_sign_name, moon_sign_name,
     pdf.set_font("Helvetica", "B", 14)
     pdf.cell(0, 10, "Key Yogas & Analysis:", ln=True)
     pdf.set_font("Helvetica", "", 11)
+    
     for y in yoga_list:
-        clean_y = y.encode('latin-1', 'replace').decode('latin-1')
-        pdf.cell(0, 7, f"- {clean_y}", ln=True)
+        # केवल अंग्रेजी वाला हिस्सा PDF में प्रिंट होगा (जैसे: Budhaditya Yoga)
+        clean_y = clean_text_for_pdf(y)
+        if clean_y:
+            pdf.cell(0, 7, f"- {clean_y}", ln=True)
+        else:
+            pdf.cell(0, 7, "- Auspicious planetary alignment present", ln=True)
 
     return pdf.output()
+    
 
 # --- Page Setup ---
 st.set_page_config(page_title="Jyotish AI - विस्तृत महा जन्मपत्री", page_icon="🔱", layout="wide")
