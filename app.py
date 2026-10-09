@@ -466,4 +466,13 @@ if submitted:
 
                 # PDF Download Button
                 section_heading("5. जन्मपत्री रिपोर्ट डाउनलोड (PDF Download)", "📥")
-                pdf_
+                pdf_data = generate_pdf_report(name, dob.strftime("%Y-%m-%d"), place, SIGNS[asc_sign], SIGNS[moon_sign_idx], active_md, active_ad, ["Gajakesari Yoga", "Sun-Mercury Budhaditya Yoga"])
+                st.download_button(
+                    label="📄 Download Complete PDF Report / पूरी PDF रिपोर्ट डाउनलोड करें",
+                    data=bytes(pdf_data),
+                    file_name=f"{name}_Jyotish_AI_Report.pdf",
+                    mime="application/pdf"
+                )
+
+        except Exception as e:
+            st.error(f"Calculation error: {e}")
