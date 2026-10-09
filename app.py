@@ -7,7 +7,7 @@ from timezonefinder import TimezoneFinder
 import zoneinfo
 from fpdf import FPDF
 
-# Initialize Swiss Ephemeris Settings
+# Initialize Swiss Ephemeris Settings (Lahiri Ayanamsha)
 swe.set_sid_mode(swe.SIDM_LAHIRI)
 
 SIGNS = [
@@ -62,7 +62,7 @@ RASHI_LORDS = {
 }
 
 GEMSTONES = {
-    "Mangal": "मूंगा (Red Coral)",
+    "Mangal": "मूँगा (Red Coral)",
     "Shukra": "हीरा / ओपल (Diamond / Opal)",
     "Budh": "पन्ना (Emerald)",
     "Chandra": "मोती (Pearl)",
@@ -83,18 +83,6 @@ RUDRAKSHA = {
     "Ketu": "9 मुखी रुद्राक्ष"
 }
 
-CAREER_MAP = {
-    "Surya": "प्रशासनिक सेवाएं, सरकारी क्षेत्र, उच्च प्रबंधन, चिकित्सा, राजनीति, एवं नेतृत्वकारी पद।",
-    "Chandra": "जल व्यवसाय, हॉस्पिटैलिटी, ट्रैवल एवं टूरिज्म, नर्सिंग, डेयरी, साहित्य, कला एवं लेखन।",
-    "Mangal": "इंजीनियरिंग, रक्षा बल/पुलिस, रियल एस्टेट, निर्माण कार्य, खेलकूद, एवं तकनीकी क्षेत्र।",
-    "Budh": "व्यापार, बैंकिंग, चार्टर्ड अकाउंटेंसी (CA), सॉफ्टवेयर/आईटी, मीडिया, पत्रकारिता, एवं अनुवाद।",
-    "Guru": "शिक्षा व अध्यापन, कानून व वकालत, वित्तीय परामर्श, ज्योतिष, धार्मिक संस्थान, एवं रिसर्च।",
-    "Shukra": "फैशन डिजाइनिंग, सौंदर्य उत्पाद, फिल्म व मीडिया, लग्जरी उद्योग, आभूषण, एवं हॉस्पिटैलिटी।",
-    "Shani": "इन्फ्रास्ट्रक्चर, माइनिंग, भारी मशीनरी, लॉजिस्टिक्स, श्रम प्रबंधन, कानून, एवं कृषि।",
-    "Rahu": "आईटी व सॉफ्टवेयर, डिजिटल मार्केटिंग, साइबर सुरक्षा, आयात-निर्यात, शेयर बाजार, एवं इलेक्ट्रॉनिक्स।",
-    "Ketu": "सॉफ्टवेयर कोडिंग, डेटा साइंस, बायोटेक्नोलॉजी, शोध कार्य, फार्मास्यूटिकल्स, एवं वैकल्पिक चिकित्सा।"
-}
-
 HEALTH_MAP = {
     "Surya": "अस्थि स्वास्थ्य, नेत्र दृष्टि, हृदय प्रणाली, एवं पित्त संबंधी संतुलन पर विशेष ध्यान दें।",
     "Chandra": "मानसिक शांति, अनिद्रा, कफ/जल जनित समस्याएं, एवं श्वसन तंत्र की देखभाल आवश्यक है।",
@@ -108,33 +96,15 @@ HEALTH_MAP = {
 }
 
 MAHADASHA_PREDICTIONS = {
-    "Surya": """
-    सूर्य की महादशा जीवन में एक नया प्रभात लेकर आती है। यह समय आपके आत्मबल, अधिकार, और सामाजिक प्रतिष्ठा में अप्रत्याशित वृद्धि का कारक बनता है। इस अवधि में राजकीय या प्रशासनिक कार्यों में सफलता प्राप्त होती है। समाज में आपका प्रभाव बढ़ता है और उच्च अधिकारियों का सहयोग मिलता है। यदि आप नौकरी या व्यवसाय में हैं, तो पदोन्नति और नेतृत्व के अवसर प्राप्त होते हैं। हालांकि, इस दौरान अहंकार और पित्त संबंधी स्वास्थ्य समस्याओं से बचना आवश्यक है।
-    """,
-    "Chandra": """
-    चंद्रमा की महादशा मन की संवेदनशीलता, रचनात्मकता और मानसिक परिवर्तनों का काल होती है। इस समय आपकी कल्पनाशक्ति और बौद्धिक क्षमता चरम पर रहती है। कला, साहित्य, जल संबंधी व्यवसाय, या यात्राओं से जुड़े कार्यों में विशेष लाभ प्राप्त होता है। माता से संबंध प्रगाढ़ होते हैं और उनका आशीर्वाद प्राप्त होता है। हालांकि, चंद्रमा के उतार-चढ़ाव के कारण मन में कभी-कभी चंचलता या मानसिक तनाव आ सकता है, जिसके लिए ध्यान और योग अत्यंत लाभप्रद रहेगा।
-    """,
-    "Mangal": """
-    मंगल की महादशा असीम ऊर्जा, साहस, और निर्णय क्षमता का काल है। यह समय भूमि, भवन, प्रॉपर्टी, और तकनीकी कार्यों में बड़ी सफलता दिलाने वाला होता है। यदि आप इंजीनियरिंग, सुरक्षा, खेलकूद, या निर्माण कार्य से जुड़े हैं, तो यह दशा आपके लिए स्वर्णिम सिद्ध हो सकती है। आप कठिन से कठिन चुनौतियों का सामना करने के लिए तैयार रहते हैं। हालांकि, जल्दबाजी में निर्णय लेने या क्रोध पर नियंत्रण न रखने से विवाद हो सकते हैं, इसलिए धैर्य बनाए रखना आवश्यक है।
-    """,
-    "Budh": """
-    बुध की महादशा बुद्धि, ज्ञान, संचार और व्यावसायिक कुशाग्रता का काल मानी जाती है। इस अवधि में आपकी वाक्-पटुता और तार्किक क्षमता में जबर्दस्त सुधार आता है। व्यापार, बैंकिंग, फाइनेंस, आईटी, मीडिया और लेखन से जुड़े जातकों को अभूतपूर्व सफलता मिलती है। नए व्यावसायिक संबंध बनते हैं जो दीर्घकालिक लाभ प्रदान करते हैं। वित्तीय स्थिति में मजबूती आती है और पढ़ाई या शोध से जुड़े लोगों के लिए यह समय अत्यंत फलदायी सिद्ध होता है।
-    """,
-    "Guru": """
-    बृहस्पति (गुरु) की महादशा जीवन में सुख, समृद्धि, ज्ञान और धार्मिक चेतना का प्रसार करती है। यह दशा वैदिक ज्योतिष में सबसे शुभ मानी जाती है। इस दौरान विवाह, संतान सुख, घर में मांगलिक कार्य और उच्च शिक्षा के योग बनते हैं। समाज में आपका सम्मान बढ़ता है और बड़ों का आशीर्वाद प्राप्त होता है। आर्थिक दृष्टिकोण से यह कालखंड अत्यंत फलदायी रहता है। अध्यात्म और दर्शन की ओर रुझान बढ़ता है, जिससे जीवन में आंतरिक शांति मिलती है।
-    """,
-    "Shukra": """
-    शुक्र की महादशा जीवन में भौतिक सुख-सुविधाओं, ऐश्वर्य, और कलात्मक उपलब्धियों का स्वर्णिम काल होती है। इस दौरान वाहन सुख, नए वस्त्र, आभूषण और अचल संपत्ति की प्राप्ति होती है। प्रेम संबंधों और वैवाहिक जीवन में मधुरता आती है। कला, फैशन, मीडिया, हॉस्पिटैलिटी या सौंदर्य प्रसाधनों के व्यापार से जुड़े जातकों को बड़ी सफलता मिलती है। सामाजिक आकर्षण बढ़ता है और जीवन में आनंद का वातावरण बना रहता है।
-    """,
-    "Shani": """
-    शनि की महादशा कड़े परिश्रम, अनुशासन, और आत्म-मंथन का काल होती है। शनि देव जातक को व्यावहारिक और परिपक्व बनाते हैं। इस अवधि में किए गए सतत प्रयास से मिलने वाली सफलता अत्यंत स्थायी और दीर्घकालिक होती है। निर्माण कार्य, मशीनरी, ट्रांसपोर्ट, कानून या जनसेवा से जुड़े कार्यों में बड़ा लाभ होता है। हालांकि, शुरुआती दौर में कुछ विलंब या संघर्ष का सामना करना पड़ सकता है, लेकिन धैर्य रखने पर यह दशा जीवन को मजबूत आधार देती है।
-    """,
-    "Rahu": """
-    राहु की महादशा जीवन में अचानक और अप्रत्याशित बदलाव लाती है। यह आउट-ऑफ-द-बॉक्स सोच और आधुनिक तकनीकों में सफलता की सूचक है। आईटी, सॉफ्टवेयर, विदेशी व्यापार, आयात-निर्यात, और डिजिटल मीडिया से जुड़े लोगों के लिए यह कालखंड असीम संभावनाएं लेकर आता है। आप स्थापित सीमाओं से बाहर निकलकर नए कीर्तिमान स्थापित करते हैं। हालांकि, इस दौरान भ्रम या अति-उत्साह में गलत निर्णय लेने से बचना चाहिए और यथार्थवादी दृष्टिकोण रखना चाहिए।
-    """,
-    "Ketu": """
-    केतु की महादशा अध्यात्म, शोध, और आत्म-साक्षात्कार का काल मानी जाती है। यह समय सांसारिक मोह-माया से थोड़ा हटकर गूढ़ विद्याओं, कोडिंग, डेटा साइंस, और मौलिक शोध में गहराई से उतरने का अवसर देता है। आपकी अंतर्दृष्टि (Intuition) बहुत मजबूत हो जाती है। यह कालखंड पुरानी मानसिक उलझनों को समाप्त कर जीवन में एक नया और स्पष्ट दृष्टिकोण प्रदान करता है। ध्यान और योग के माध्यम से यह दशा परम शांति देती है।
-    """
+    "Surya": "सूर्य की महादशा आत्मबल, अधिकार, सामाजिक प्रतिष्ठा और प्रशासनिक कार्यों में सफलता प्रदान करती है। अहंकार से बचें।",
+    "Chandra": "चंद्रमा की महादशा मन की संवेदनशीलता, रचनात्मकता और मानसिक सुख लाती है। माता का सहयोग मिलता है।",
+    "Mangal": "मंगल की महादशा असीम ऊर्जा, साहस, पराक्रम, भूमि और तकनीकी कार्यों में बड़ी सफलता का काल है।",
+    "Budh": "बुध की महादशा बुद्धि, ज्ञान, संचार, बैंकिंग, लेखन और व्यापारिक कुशाग्रता का काल मानी जाती है।",
+    "Guru": "बृहस्पति की महादशा सुख, समृद्धि, उच्च शिक्षा, आध्यात्मिक ज्ञान और दांपत्य जीवन में वृद्धि लाती है।",
+    "Shukra": "शुक्र की महादशा भौतिक सुख-सुविधाओं, वाहन, आभूषण, कला और विलासिता का स्वर्णिम काल होती है।",
+    "Shani": "शनि की महादशा कड़े परिश्रम, अनुशासन और परिपक्वता का काल है। यह स्थायी और दीर्घकालिक फल देती है।",
+    "Rahu": "राहु की महादशा अचानक बदलाव, आधुनिक तकनीक, विदेशी व्यापार और लीक से हटकर सोचने का अवसर देती है।",
+    "Ketu": "केतु की महादशा आध्यात्म, गुप्त विद्याओं, शोध और आत्म-साक्षात्कार का काल है। अंतर्दृष्टि मजबूत होती है।"
 }
 
 def section_heading(title, icon="✨"):
@@ -155,7 +125,8 @@ def section_heading(title, icon="✨"):
         </div>
         """,
         unsafe_allow_html=True
-)
+    )
+
 def get_navamsha_sign(abs_degree):
     abs_degree = abs_degree % 360
     d1_sign = int(abs_degree // 30)
@@ -191,11 +162,18 @@ def render_north_indian_chart(asc_sign, planet_signs, title):
     for i, (x, y) in enumerate(positions):
         sign_index = (asc_sign + i) % 12
         planets_in_house = planet_signs.get(SIGNS[sign_index], [])
-        p_str = "\n".join(planets_in_house) if planets_in_house else ""
+        
+        # ग्रहों के नाम ओवरलैप होने से बचाने के लिए छोटा फॉन्ट और फॉर्मेटिंग
+        if len(planets_in_house) > 2:
+            p_str = ", ".join(planets_in_house[:2]) + "\n" + ", ".join(planets_in_house[2:])
+            font_size = 6.5
+        else:
+            p_str = "\n".join(planets_in_house) if planets_in_house else ""
+            font_size = 7.5
 
         ax.text(x, y + 0.05, f"{sign_index + 1}", color="darkred", fontsize=10, weight="bold", ha="center")
         if p_str:
-            ax.text(x, y - 0.05, p_str, color="navy", fontsize=8, ha="center")
+            ax.text(x, y - 0.06, p_str, color="navy", fontsize=font_size, ha="center")
 
     ax.set_xlim(0, 1)
     ax.set_ylim(0, 1)
@@ -224,7 +202,8 @@ def generate_pdf_report(name, dob_str, place_str, asc_sign_name, moon_sign_name,
     pdf.cell(0, 10, "Key Yogas & Analysis:", ln=True)
     pdf.set_font("Helvetica", "", 11)
     for y in yoga_list:
-        pdf.cell(0, 7, f"- {y}", ln=True)
+        clean_y = y.encode('latin-1', 'replace').decode('latin-1')
+        pdf.cell(0, 7, f"- {clean_y}", ln=True)
 
     return pdf.output()
 
@@ -252,19 +231,20 @@ with col_a:
     st.write("**Birth Time / जन्म समय (AM / PM के साथ):**")
     t_col1, t_col2, t_col3 = st.columns(3)
     with t_col1:
-        hour12 = st.number_input("Hour (घंटा)", min_value=1, max_value=12, value=1)
+        hour12 = st.number_input("Hour (घंटा)", min_value=1, max_value=12, value=12)
     with t_col2:
         minute = st.number_input("Minute (मिनट)", min_value=0, max_value=59, value=0)
     with t_col3:
-        ampm = st.selectbox("AM / PM", ["AM (सुबह/रात)", "PM (दोपहर/शाम)"])
+        ampm = st.selectbox("AM / PM", ["PM (दोपहर/शाम)", "AM (सुबह/रात)"])
 
 with col_b:
-    place = st.text_input("Birth place & Country / जन्म स्थान व देश", value="", placeholder="जैसे: Dang Nepal, Delhi India, London UK, New York USA")
+    place = st.text_input("Birth place & Country / जन्म स्थान व देश", value="", placeholder="जैसे: Ghorahi Nepal, Delhi India, London UK")
 
 submitted = st.button("🚀 Generate Full Detailed Report / संपूर्ण विस्तृत महा-रिपोर्ट देखें", type="primary")
+
 if submitted:
     if not name or not dob or not place:
-        st.warning("कृपया सभी विवरण (नाम, लिंग, जन्म तिथि, समय और जन्म स्थान) भरें!")
+        st.warning("कृपया सभी विवरण (नाम, जन्म तिथि, समय और जन्म स्थान) भरें!")
     else:
         try:
             hour24 = hour12 % 12
@@ -284,16 +264,16 @@ if submitted:
                 tf = TimezoneFinder()
                 tz_str = tf.timezone_at(lng=lon, lat=lat)
                 
+                # सही टाइमज़ोन कन्वर्जन
+                local_dt_naive = datetime.combine(dob, bt)
                 if tz_str:
                     tz_obj = zoneinfo.ZoneInfo(tz_str)
-                    local_dt_naive = datetime.combine(dob, bt)
-                    local_dt_aware = local_dt_naive.replace(tzinfo=tz_obj)
-                    utc_offset_hours = local_dt_aware.utcoffset().total_seconds() / 3600.0
+                    local_dt_aware = datetime.combine(dob, bt, tzinfo=tz_obj)
                     utc_dt = local_dt_aware.astimezone(zoneinfo.ZoneInfo("UTC"))
+                    utc_offset_hours = local_dt_aware.utcoffset().total_seconds() / 3600.0
                 else:
                     tz_str = "UTC Offset (+5.75 Default)"
                     utc_offset_hours = 5.75
-                    local_dt_naive = datetime.combine(dob, bt)
                     utc_dt = local_dt_naive - timedelta(hours=5, minutes=45)
 
                 st.success(f"📍 स्थान मिला: **{location.address}** | टाइमज़ोन: **{tz_str} (UTC {utc_offset_hours:+.2f} hrs)** | समय: **{hour12}:{minute:02d} {ampm[:2]}**")
@@ -314,7 +294,7 @@ if submitted:
                 d1_planet_signs = {}
                 d9_planet_signs = {}
                 planet_positions_map = {}
-                moon_sign_idx = 0  # Fixed variable
+                moon_sign_idx = 0
 
                 for planet, code in PLANETS.items():
                     res = swe.calc_ut(jd, code, flags)
@@ -346,6 +326,7 @@ if submitted:
                     d1_planet_signs.setdefault(SIGNS[sign_index], []).append(planet_display)
                     d9_planet_signs.setdefault(SIGNS[d9_sign_index], []).append(planet_display)
 
+                # Ketu Calculation (180 degrees from Rahu)
                 rahu_res = swe.calc_ut(jd, swe.MEAN_NODE, flags)
                 rahu_deg = rahu_res[0][0] % 360
                 ketu_degree = (rahu_deg + 180) % 360
@@ -368,11 +349,11 @@ if submitted:
 
                 st.dataframe(rows, use_container_width=True)
 
-                # 2. CHARTS
-                res_houses = swe.houses_ex(jd, lat, lon, b'P', swe.FLG_SIDEREAL)
-                cusps, ascmc = res_houses[0], res_houses[1]
-                
-                asc_degree = ascmc[0] % 360
+                # 2. CHARTS & LAGNA (Accurate Sidereal Ayanamsha)
+                ayanamsha = swe.get_ayanamsa_ut(jd)
+                res_houses = swe.houses(jd, lat, lon, b'P')
+                asc_tropical = res_houses[1][0]
+                asc_degree = (asc_tropical - ayanamsha) % 360
                 asc_sign = int(asc_degree // 30)
                 d9_asc_sign = get_navamsha_sign(asc_degree)
 
@@ -391,8 +372,8 @@ if submitted:
                     st.pyplot(fig_d9)
                     plt.close(fig_d9)
 
-                # 3. DASHA & ANTARDASHA (ACCURATE CALCULATION)
-                section_heading("3. महादशा एवं अंतर्दशा का अति-विस्तृत फलादेश (Dasha Analysis)", "⏳")
+                # 3. DASHA & ANTARDASHA (Full 120-Year Life Cycle)
+                section_heading("3. महादशा एवं अंतर्दशा का विस्तृत फलादेश (Dasha Analysis)", "⏳")
 
                 moon_res = swe.calc_ut(jd, swe.MOON, flags)
                 moon_degree = moon_res[0][0] % 360
@@ -411,10 +392,10 @@ if submitted:
                 current_start_date = local_dt_naive
                 active_md = ""
                 active_ad = ""
-
                 all_md_rows = []
 
-                for m_idx in range(9):
+                # कुल 14 चक्र लूप ताकि 100+ वर्ष के जातक की दशा कभी अधूरी न छूटे
+                for m_idx in range(14):
                     md_lord_i = (first_md_lord_idx + m_idx) % 9
                     md_name = DASHA_LORDS[md_lord_i]
                     md_total_years = DASHA_YEARS[md_name]
@@ -445,68 +426,64 @@ if submitted:
                     })
                     current_start_date = md_end_date
 
+                    # यदि जातक की आयु 100 वर्ष पार हो जाए तो लूप रोकें
+                    if (current_start_date - local_dt_naive).days > 365.25 * 105:
+                        break
+
                 st.dataframe(all_md_rows, use_container_width=True)
 
-                if active_md and active_ad:
-                    with st.expander(f"🌟 वर्तमान सक्रिय महादशा ({active_md}) एवं अंतर्दशा ({active_ad}) का विस्तृत प्रभाव", expanded=True):
+                if active_md:
+                    with st.expander(f"🌟 वर्तमान सक्रिय महादशा ({active_md}) {f'एवं अंतर्दशा ({active_ad})' if active_ad else ''} का प्रभाव", expanded=True):
                         st.write(f"• **महादशापति ({active_md}) का प्रभाव:** {MAHADASHA_PREDICTIONS.get(active_md, 'यह कालखंड आपके जीवन में नए अवसर लाएगा।')}")
-                        st.write(f"• **अंतर्दशापति ({active_ad}) का प्रभाव:** वर्तमान समय में आपके दैनिक निर्णयों और परिणामों पर {active_ad} का मुख्य प्रभाव है।")
+                        if active_ad:
+                            st.write(f"• **अंतर्दशापति ({active_ad}) का प्रभाव:** वर्तमान समय में आपके दैनिक निर्णयों और परिणामों पर **{active_ad}** का मुख्य प्रभाव है।")
 
-                # 4. HEALTH & WELLNESS ANALYSIS
-                section_heading("4. स्वास्थ्य एवं शारीरिक आरोग्य का विस्तृत विश्लेषण (Health Report)", "🏥")
-
+                # 4. HEALTH REPORT
+                section_heading("4. स्वास्थ्य एवं शारीरिक आरोग्य (Health Report)", "🏥")
                 sixth_sign_idx = (asc_sign + 5) % 12
                 sixth_lord = RASHI_LORDS[sixth_sign_idx]
-                planets_in_6th = [p for p, s_idx in planet_positions_map.items() if s_idx == sixth_sign_idx]
 
                 with st.expander("🏥 रोग प्रतिरोधक क्षमता एवं स्वास्थ्य सावधानियां", expanded=True):
                     st.write(f"• **षष्ठ भाव (रोग स्थान):** इस भाव में **{SIGNS[sixth_sign_idx]} ({SIGNS_HI[sixth_sign_idx]})** राशि है, जिसके स्वामी **{sixth_lord}** हैं।")
-                    st.write(f"• **स्वाभाविक प्रवृत्ति:** {HEALTH_MAP.get(sixth_lord, 'स्वास्थ्य उत्तम रहेगा।')}")
+                    st.write(f"• **स्वास्थ्य निर्देश:** {HEALTH_MAP.get(sixth_lord, 'सामान्य स्वास्थ्य उत्तम रहेगा। नियमित दिनचर्या रखें।')}")
 
                 # 5. LOVE & RELATIONSHIPS
-                section_heading("5. प्रेम, लव-अफेयर्स एवं संबंध (Love & Relationships)", "❤️")
-
+                section_heading("5. प्रेम, संबंध एवं वैवाहिक जीवन", "❤️")
                 fifth_sign_idx = (asc_sign + 4) % 12
                 fifth_lord = RASHI_LORDS[fifth_sign_idx]
+                seventh_sign_idx = (asc_sign + 6) % 12
+                seventh_lord = RASHI_LORDS[seventh_sign_idx]
 
-                with st.expander("❤️ प्रेम संबंध एवं विवाह संभावनाएं", expanded=True):
-                    st.write(f"• **पंचमेश ({fifth_lord}):** आपके रिश्तों में भावनात्मक गहराई और आपसी विश्वास मुख्य भूमिका निभाएगा।")
+                with st.expander("❤️ प्रेम संबंध एवं वैवाहिक विश्लेषण", expanded=True):
+                    st.write(f"• **पंचमेश (बुद्धि व प्रेम):** {fifth_lord} — भावनात्मक समझ और संबंधों में ईमानदारी सहायक होगी।")
+                    st.write(f"• **सप्तमेश (दांपत्य जीवन):** {seventh_lord} — जीवनसाथी के साथ तालमेल बनाए रखने से गृहस्थ जीवन सुखद रहेगा।")
 
                 # 6. YOGAS & RAJYOGA ANALYSIS
                 section_heading("6. कुंडली में स्थित प्रमुख राजयोग एवं धनयोग", "👑")
-
                 detected_yogas = []
+
                 if planet_positions_map.get("Surya") == planet_positions_map.get("Budh"):
-                    detected_yogas.append("बुधादित्य योग (Budhaditya Yoga): सूर्य और बुध की युति से कुशाग्र बुद्धि और मान-सम्मान प्राप्त होता है।")
+                    detected_yogas.append("बुधादित्य योग (Budhaditya Yoga): सूर्य और बुध की युति से कुशाग्र बुद्धि, नेतृत्व क्षमता और मान-सम्मान प्राप्त होता है।")
 
                 guru_p = planet_positions_map.get("Guru")
                 chandra_p = planet_positions_map.get("Chandra")
                 if guru_p is not None and chandra_p is not None:
-                    diff = abs(guru_p - chandra_p) % 12
+                    # गजकेसरी योग: चंद्रमा से गुरु 1, 4, 7 या 10वें भाव में हो
+                    diff = (guru_p - chandra_p) % 12
                     if diff in [0, 3, 6, 9]:
-                        detected_yogas.append("गजकेसरी योग (Gajakesari Yoga): असीम ज्ञान, धन और स्थायी समृद्धि प्रदान करता है।")
+                        detected_yogas.append("गजकेसरी योग (Gajakesari Yoga): गुरु और चंद्रमा का केंद्र संबंध असीम ज्ञान, प्रतिष्ठा और स्थायी समृद्धि प्रदान करता है।")
 
                 if not detected_yogas:
-                    detected_yogas.append("आपकी कुंडली में कर्मेश और भाग्येश का शुभ संबंध निर्मित हो रहा है।")
+                    detected_yogas.append("लग्न और केंद्र भावों का संबंध आपके जीवन को सतत प्रगतिशील बनाता है।")
 
                 for y in detected_yogas:
                     st.success(f"• {y}")
 
-                # 7. AGE-WISE PREDICTIONS
-                section_heading("7. जीवन कालखंड अनुसार अति-विस्तृत महा-फलादेश", "🔮")
-
-                with st.expander("🎓 20 से 30 वर्ष की आयु: शिक्षा, कौशल विकास एवं आजीविका", expanded=True):
-                    st.write("• **करियर निर्माण:** 24 से 27 वर्ष की आयु के मध्य करियर में पहला बड़ा ब्रेक या अवसर प्राप्त होता है।")
-
-                with st.expander("💍 25 से 35 वर्ष की आयु: विवाह एवं पारिवारिक जिम्मेदारियां", expanded=True):
-                    st.write("• **दांपत्य सुख:** विवाह के पश्चात भाग्योदय की गति तेज़ होगी।")
-
-                # 8. REMEDIES & PDF DOWNLOAD
-                section_heading("8. शुभ रत्न, रुद्राक्ष एवं उपाय (Remedies)", "💎")
-
+                # 7. REMEDIES & PDF DOWNLOAD
+                section_heading("7. शुभ रत्न, रुद्राक्ष एवं उपाय (Remedies)", "💎")
                 lagna_lord = RASHI_LORDS[asc_sign]
-                st.write(f"• **जीवनरत्न:** `{GEMSTONES.get(lagna_lord, 'नेचुरल ओपल')}`")
-                st.write(f"• **रुद्राक्ष:** **{RUDRAKSHA.get(lagna_lord, '5 मुखी रुद्राक्ष')}**")
+                st.write(f"• **जीवनरत्न (Lagna Gemstone):** `{GEMSTONES.get(lagna_lord, 'नेचुरल ओपल')}`")
+                st.write(f"• **शुभ रुद्राक्ष:** **{RUDRAKSHA.get(lagna_lord, '5 मुखी रुद्राक्ष')}**")
 
                 st.markdown("---")
                 pdf_bytes = generate_pdf_report(
@@ -517,10 +494,9 @@ if submitted:
                 st.download_button(
                     label="📄 Download Complete Kundli PDF Report",
                     data=bytes(pdf_bytes),
-                    file_name=f"{name}_Jyotish_AI_Report.pdf",
+                    file_name=f"{name}_Jyotish_Report.pdf",
                     mime="application/pdf"
                 )
 
         except Exception as e:
             st.error(f"Calculation error: {e}")
-            
