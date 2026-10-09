@@ -146,11 +146,28 @@ if submitted:
 
         st.dataframe(house_rows, use_container_width=True)
         
-        st.info(
-            "This is the first calculation module. "
-            "Lagna, houses, Dasha and AI interpretation "
-            "are not implemented yet. Birth place coordinates must be accurate."
-                    )
+                # Vimshottari Dasha - basic starting point
+        st.subheader("Vimshottari Mahadasha")
+
+        moon_result, _ = swe.calc_ut(jd, swe.MOON, flags)
+        moon_degree = moon_result[0] % 360
+        moon_nak = int(moon_degree / (360 / 27))
+
+        dasha_lords = [
+            "Ketu", "Shukra", "Surya", "Chandra",
+            "Mangal", "Rahu", "Guru", "Shani", "Budh"
+        ]
+
+        dasha_years = {
+            "Ketu": 7, "Shukra": 20, "Surya": 6,
+            "Chandra": 10, "Mangal": 7, "Rahu": 18,
+            "Guru": 16, "Shani": 19, "Budh": 17
+        }
+
+        first_lord = dasha_lords[moon_nak % 9]
+        st.write("Janma Nakshatra:", NAKSHATRAS[moon_nak])
+        st.write("Janma Mahadasha:", first_lord)
+        st.write("Mahadasha Duration:", dasha_years[first_lord], "years")
 
     except Exception as e:
         st.error(f"Calculation error: {e}")
