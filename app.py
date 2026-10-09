@@ -182,8 +182,8 @@ def render_north_indian_chart(asc_sign, planet_signs, title):
     return fig
     import io
 
-def generate_pdf_report(name, dob_str, place_str, asc_sign_name, moon_sign_name, 
-                        active_md, active_ad, yoga_list, rows_data, fig_chart, dasha_rows):
+def generate_pdf_report(name, dob_str, place_str, asc_sign_name, moon_sign_name, active_md, active_ad, yoga_list, rows_data=None, fig_chart=None, dasha_rows=None):
+    
     pdf = FPDF()
     pdf.set_auto_page_break(auto=True, margin=15)
     pdf.add_page()
