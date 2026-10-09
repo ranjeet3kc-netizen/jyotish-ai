@@ -5,3 +5,4 @@ uharfbuzz
 geopy
 timezonefinder
 fpdf2
+tzdata
