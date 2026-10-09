@@ -3,3 +3,4 @@ pyswisseph
 matplotlib
 uharfbuzz
 geopy
+timezonefinder
