@@ -201,6 +201,8 @@ if submitted:
 
         font_path = "/usr/share/fonts/truetype/noto/NotoSansDevanagari-Regular.ttf"
         from matplotlib.patches import Polygon
+      
+        hindi_font = fm.FontProperties(fname=font_path)
 
         fig, ax = plt.subplots(figsize=(7, 7))
         
