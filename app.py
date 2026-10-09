@@ -233,7 +233,7 @@ if submitted:
                 if row["Rashi"] == sign_name
             ]
 
-            ax.text(
+            ax.text(fontproperties=hindi_font,
                 x, y,
                 f"{i+1} भाव\n{sign_name}\n" +
                 ("\n".join(grah) if grah else "—"),
