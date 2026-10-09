@@ -2,6 +2,7 @@ import streamlit as st
 import swisseph as swe
 from datetime import datetime, timedelta, date, time
 import matplotlib.pyplot as plt
+from geopy.geocoders import Nominatim
 
 # Initialize Swiss Ephemeris Settings
 swe.set_sid_mode(swe.SIDM_LAHIRI)
@@ -109,200 +110,216 @@ def render_north_indian_chart(asc_sign, planet_signs, title):
     return fig
 
 
-st.set_page_config(page_title="Jyotish AI - महा भाग्यफल ग्रन्थ", page_icon="🔱", layout="wide")
+st.set_page_config(page_title="Jyotish AI - महा जन्मपत्री", page_icon="🔱", layout="wide")
 st.title("🔱 Jyotish AI — महा जन्मपत्री एवं विस्तृत भाग्यफल")
 st.caption("Vedic Astrology | 12 भाव, 9 ग्रह एवं विस्तृत महादशा विश्लेषण")
 
-st.header("Birth Details / जन्म विवरण")
+st.header("Birth Details / जन्म विवरण दर्ज करें")
 
-col_a, col_b, col_c = st.columns(3)
+col_a, col_b = st.columns(2)
 with col_a:
-    name = st.text_input("Name / नाम", value="Rana")
-    dob = st.date_input("Date of birth", value=date(2000, 4, 15), min_value=date(1900, 1, 1))
+    name = st.text_input("Name / नाम", value="", placeholder="अपना नाम लिखें")
+    dob = st.date_input("Date of birth / जन्म तिथि", value=None, min_value=date(1900, 1, 1))
+    bt = st.time_input("Birth time / जन्म समय", value=None)
+
 with col_b:
-    bt = st.time_input("Birth time", value=time(1, 0))
-    place = st.text_input("Birth place / जन्म स्थान", value="Ghorahi, Nepal")
-with col_c:
-    lat = st.number_input("Latitude", value=28.0300, format="%.4f")
-    lon = st.number_input("Longitude", value=82.4900, format="%.4f")
+    place = st.text_input("Birth place & Country / जन्म स्थान व देश", value="", placeholder="जैसे: Dang Nepal, Delhi India, London UK")
+    utc_offset = st.number_input("Timezone Offset from UTC (Hours) / समय क्षेत्र अंतर", value=5.75, step=0.25, help="Nepal: +5.75, India: +5.5, UK: 0, USA (NY): -5.0")
 
 submitted = st.button("Generate Full Detailed Report / विस्तृत महा-रिपोर्ट जनरेट करें", type="primary")
 
 if submitted:
-    try:
-        local_dt = datetime.combine(dob, bt)
-        utc_dt = local_dt - timedelta(hours=5, minutes=45)
+    if not name or not dob or not bt or not place:
+        st.warning("कृपया सभी विवरण (नाम, जन्म तिथि, समय और जन्म स्थान) भरें!")
+    else:
+        try:
+            # Geocoding Place to get Lat/Lon automatically for ANY place in the world
+            geolocator = Nominatim(user_agent="jyotish_app")
+            location = geolocator.geocode(place)
 
-        jd = swe.julday(
-            utc_dt.year,
-            utc_dt.month,
-            utc_dt.day,
-            utc_dt.hour + utc_dt.minute / 60.0 + utc_dt.second / 3600.0
-        )
+            if not location:
+                st.error("जन्म स्थान नहीं मिल सका! कृपया स्थान और देश का नाम सही से लिखें (जैसे: Kathmandu Nepal, Delhi India)।")
+            else:
+                lat = location.latitude
+                lon = location.longitude
+                st.success(f"स्थान मिला: **{location.address}** (Lat: {round(lat, 4)}, Lon: {round(lon, 4)})")
 
-        flags = swe.FLG_SWIEPH | swe.FLG_SIDEREAL
+                local_dt = datetime.combine(dob, bt)
+                
+                # Dynamic UTC conversion based on user-selected timezone offset
+                offset_hours = int(utc_offset)
+                offset_minutes = int((utc_offset - offset_hours) * 60)
+                utc_dt = local_dt - timedelta(hours=offset_hours, minutes=offset_minutes)
 
-        # 1. PLANETARY POSITIONS
-        st.subheader("1. ग्रह स्थिति एवं नवमांश तालिका")
+                jd = swe.julday(
+                    utc_dt.year,
+                    utc_dt.month,
+                    utc_dt.day,
+                    utc_dt.hour + utc_dt.minute / 60.0 + utc_dt.second / 3600.0
+                )
 
-        rows = []
-        d1_planet_signs = {}
-        d9_planet_signs = {}
-        planet_positions_map = {}
-        moon_sign_idx = 0
+                flags = swe.FLG_SWIEPH | swe.FLG_SIDEREAL
 
-        for planet, code in PLANETS.items():
-            result, _ = swe.calc_ut(jd, code, flags)
-            degree = result[0] % 360
-            speed = result[3]
+                # 1. PLANETARY POSITIONS
+                st.subheader("1. ग्रह स्थिति एवं नवमांश तालिका")
 
-            is_retro = speed < 0 and planet not in ["Surya", "Chandra", "Rahu"]
-            planet_display = f"{planet} (R)" if is_retro else planet
+                rows = []
+                d1_planet_signs = {}
+                d9_planet_signs = {}
+                planet_positions_map = {}
+                moon_sign_idx = 0
 
-            sign_index = int(degree // 30)
-            sign_degree = degree % 30
-            nak_index = int(degree / (360 / 27))
+                for planet, code in PLANETS.items():
+                    result, _ = swe.calc_ut(jd, code, flags)
+                    degree = result[0] % 360
+                    speed = result[3]
 
-            planet_positions_map[planet] = sign_index
+                    is_retro = speed < 0 and planet not in ["Surya", "Chandra", "Rahu"]
+                    planet_display = f"{planet} (R)" if is_retro else planet
 
-            if planet == "Chandra":
-                moon_sign_idx = sign_index
+                    sign_index = int(degree // 30)
+                    sign_degree = degree % 30
+                    nak_index = int(degree / (360 / 27))
 
-            d9_sign_index = get_navamsha_sign(degree)
+                    planet_positions_map[planet] = sign_index
 
-            rows.append({
-                "Planet": planet_display,
-                "D1 Rashi": SIGNS[sign_index],
-                "Degree": round(sign_degree, 2),
-                "Nakshatra": NAKSHATRAS[nak_index],
-                "D9 Navamsha Rashi": SIGNS[d9_sign_index],
-                "Status": "Retrograde" if is_retro else "Direct"
-            })
+                    if planet == "Chandra":
+                        moon_sign_idx = sign_index
 
-            d1_planet_signs.setdefault(SIGNS[sign_index], []).append(planet_display)
-            d9_planet_signs.setdefault(SIGNS[d9_sign_index], []).append(planet_display)
+                    d9_sign_index = get_navamsha_sign(degree)
 
-        rahu_res, _ = swe.calc_ut(jd, swe.MEAN_NODE, flags)
-        rahu_deg = rahu_res[0] % 360
-        ketu_degree = (rahu_deg + 180) % 360
-        ketu_sign = int(ketu_degree // 30)
-        ketu_nak = int(ketu_degree / (360 / 27))
-        ketu_d9_sign = get_navamsha_sign(ketu_degree)
+                    rows.append({
+                        "Planet": planet_display,
+                        "D1 Rashi": SIGNS[sign_index],
+                        "Degree": round(sign_degree, 2),
+                        "Nakshatra": NAKSHATRAS[nak_index],
+                        "D9 Navamsha Rashi": SIGNS[d9_sign_index],
+                        "Status": "Retrograde" if is_retro else "Direct"
+                    })
 
-        planet_positions_map["Ketu"] = ketu_sign
+                    d1_planet_signs.setdefault(SIGNS[sign_index], []).append(planet_display)
+                    d9_planet_signs.setdefault(SIGNS[d9_sign_index], []).append(planet_display)
 
-        rows.append({
-            "Planet": "Ketu",
-            "D1 Rashi": SIGNS[ketu_sign],
-            "Degree": round(ketu_degree % 30, 2),
-            "Nakshatra": NAKSHATRAS[ketu_nak],
-            "D9 Navamsha Rashi": SIGNS[ketu_d9_sign],
-            "Status": "Retrograde"
-        })
-        d1_planet_signs.setdefault(SIGNS[ketu_sign], []).append("Ketu")
-        d9_planet_signs.setdefault(SIGNS[ketu_d9_sign], []).append("Ketu")
+                rahu_res, _ = swe.calc_ut(jd, swe.MEAN_NODE, flags)
+                rahu_deg = rahu_res[0] % 360
+                ketu_degree = (rahu_deg + 180) % 360
+                ketu_sign = int(ketu_degree // 30)
+                ketu_nak = int(ketu_degree / (360 / 27))
+                ketu_d9_sign = get_navamsha_sign(ketu_degree)
 
-        st.dataframe(rows, use_container_width=True)
+                planet_positions_map["Ketu"] = ketu_sign
 
-        # 2. CHARTS
-        cusps, ascmc = swe.houses_ex(jd, lat, lon, b'P', swe.FLG_SIDEREAL)
-        asc_degree = ascmc[0] % 360
-        asc_sign = int(asc_degree // 30)
-        d9_asc_sign = get_navamsha_sign(asc_degree)
+                rows.append({
+                    "Planet": "Ketu",
+                    "D1 Rashi": SIGNS[ketu_sign],
+                    "Degree": round(ketu_degree % 30, 2),
+                    "Nakshatra": NAKSHATRAS[ketu_nak],
+                    "D9 Navamsha Rashi": SIGNS[ketu_d9_sign],
+                    "Status": "Retrograde"
+                })
+                d1_planet_signs.setdefault(SIGNS[ketu_sign], []).append("Ketu")
+                d9_planet_signs.setdefault(SIGNS[ketu_d9_sign], []).append("Ketu")
 
-        st.subheader("2. D1 (जन्म) एवं D9 (नवमांश) चक्र")
-        col1, col2 = st.columns(2)
+                st.dataframe(rows, use_container_width=True)
 
-        with col1:
-            st.write(f"**D1 लग्न राशि:** {SIGNS[asc_sign]} ({SIGNS_HI[asc_sign]}) — {round(asc_degree % 30, 2)}°")
-            fig_d1 = render_north_indian_chart(asc_sign, d1_planet_signs, "D1 - जन्म कुंडली")
-            st.pyplot(fig_d1)
-            plt.close(fig_d1)
+                # 2. CHARTS
+                cusps, ascmc = swe.houses_ex(jd, lat, lon, b'P', swe.FLG_SIDEREAL)
+                asc_degree = ascmc[0] % 360
+                asc_sign = int(asc_degree // 30)
+                d9_asc_sign = get_navamsha_sign(asc_degree)
 
-        with col2:
-            st.write(f"**D9 नवमांश लग्न राशि:** {SIGNS[d9_asc_sign]} ({SIGNS_HI[d9_asc_sign]})")
-            fig_d9 = render_north_indian_chart(d9_asc_sign, d9_planet_signs, "D9 - नवमांश कुंडली")
-            st.pyplot(fig_d9)
-            plt.close(fig_d9)
+                st.subheader("2. D1 (जन्म) एवं D9 (नवमांश) चक्र")
+                col1, col2 = st.columns(2)
 
-        # 3. DETAILED 12 HOUSES ANALYSIS
-        st.subheader("3. समस्त 12 भावों का अति-विस्तृत फलादेश")
+                with col1:
+                    st.write(f"**D1 लग्न राशि:** {SIGNS[asc_sign]} ({SIGNS_HI[asc_sign]}) — {round(asc_degree % 30, 2)}°")
+                    fig_d1 = render_north_indian_chart(asc_sign, d1_planet_signs, "D1 - जन्म कुंडली")
+                    st.pyplot(fig_d1)
+                    plt.close(fig_d1)
 
-        house_details = [
-            ("प्रथम भाव (तनु भाव)", "व्यक्तित्व, शारीरिक गठन, आत्मबल, विचार और स्वास्थ्य का प्रतिनिधित्व करता है।"),
-            ("द्वितीय भाव (धन भाव)", "कुटुंब, वाणी, प्रारंभिक शिक्षा, संचित धन और खान-पान का भाव है।"),
-            ("तृतीय भाव (सहज भाव)", "पराक्रम, छोटे भाई-बहन, साहस, संचार माध्यम और व्यावहारिक हुनर का भाव है।"),
-            ("चतुर्थ भाव (सुख भाव)", "माता का सुख, भूमि, अचल संपत्ति, भवन, वाहन और मानसिक शांति का प्रतीक है।"),
-            ("पंचम भाव (पुत्र/बुद्धि भाव)", "उच्च शिक्षा, बुद्धि, संतान, पूर्व जन्म के पुण्य और निर्णय लेने की क्षमता का भाव है।"),
-            ("षष्ठ भाव (रिपु भाव)", "प्रतिस्पर्धा, रोग, ऋण, शत्रु और दैनिक कार्यशैली का प्रतिनिधित्व करता है।"),
-            ("सप्तम भाव (जाया भाव)", "विवाह, जीवनसाथी, साझेदारी, व्यापारिक संबंध और समाज में प्रतिष्ठा का भाव है।"),
-            ("अष्टम भाव (आयु भाव)", "आयु, गुप्त ज्ञान, अचानक होने वाले लाभ/हानि, शोध और गूढ़ रहस्यों का भाव है।"),
-            ("नवम भाव (भाग्य भाव)", "भाग्य, धर्म, गुरुजनों का मार्गदर्शन, उच्च ज्ञान और लंबी यात्राओं का भाव है।"),
-            ("दशम भाव (कर्म भाव)", "करियर, कार्यक्षेत्र, सामाजिक प्रतिष्ठा, अधिकार और आजीविका का मुख्य स्थान है।"),
-            ("एकदश भाव (लाभ भाव)", "आय के स्रोत, इच्छा पूर्ति, बड़े भाई-बहन और वित्तीय लाभ का प्रतीक है।"),
-            ("द्वादश भाव (व्यय भाव)", "विदेश यात्रा, व्यय, मोक्ष, अस्पताल/एकांतवास और गुप्त शत्रुओं का भाव है।")
-        ]
+                with col2:
+                    st.write(f"**D9 नवमांश लग्न राशि:** {SIGNS[d9_asc_sign]} ({SIGNS_HI[d9_asc_sign]})")
+                    fig_d9 = render_north_indian_chart(d9_asc_sign, d9_planet_signs, "D9 - नवमांश कुंडली")
+                    st.pyplot(fig_d9)
+                    plt.close(fig_d9)
 
-        for house_num in range(1, 13):
-            h_sign_idx = (asc_sign + house_num - 1) % 12
-            h_sign_name = SIGNS[h_sign_idx]
-            h_lord = RASHI_LORDS[h_sign_idx]
-            planets_here = [p for p, s_idx in planet_positions_map.items() if s_idx == h_sign_idx]
-            h_title, h_desc = house_details[house_num - 1]
+                # 3. DETAILED 12 HOUSES ANALYSIS
+                st.subheader("3. समस्त 12 भावों का अति-विस्तृत फलादेश")
 
-            with st.expander(f"📍 {house_num}. {h_title} — राशि: {h_sign_name} ({SIGNS_HI[h_sign_idx]})", expanded=True):
-                st.write(f"• **भाव का महत्व:** {h_desc}")
-                st.write(f"• **भाव स्वामी (House Lord):** `{h_lord}`")
-                st.write(f"• **स्थित ग्रह:** `{', '.join(planets_here) if planets_here else 'खाली भाव (कोई ग्रह नहीं)'}`")
-                st.write(f"• **विस्तृत विश्लेषण:** इस भाव में {SIGNS_HI[h_sign_idx]} राशि स्थित होने के कारण, स्वामी `{h_lord}` की स्थिति आपके जीवन के इस क्षेत्र में महत्वपूर्ण भूमिका निभाएगी। यदि इस भाव में ग्रह विराजमान हैं, तो उनके गुणधर्म और कारकत्व इस भाव के फलों को तीव्र बनाएंगे।")
+                house_details = [
+                    ("प्रथम भाव (तनु भाव)", "व्यक्तित्व, शारीरिक गठन, आत्मबल, विचार और स्वास्थ्य का प्रतिनिधित्व करता है।"),
+                    ("द्वितीय भाव (धन भाव)", "कुटुंब, वाणी, प्रारंभिक शिक्षा, संचित धन और खान-पान का भाव है।"),
+                    ("तृतीय भाव (सहज भाव)", "पराक्रम, छोटे भाई-बहन, साहस, संचार माध्यम और व्यावहारिक हुनर का भाव है।"),
+                    ("चतुर्थ भाव (सुख भाव)", "माता का सुख, भूमि, अचल संपत्ति, भवन, वाहन और मानसिक शांति का प्रतीक है।"),
+                    ("पंचम भाव (पुत्र/बुद्धि भाव)", "उच्च शिक्षा, बुद्धि, संतान, पूर्व जन्म के पुण्य और निर्णय लेने की क्षमता का भाव है।"),
+                    ("षष्ठ भाव (रिपु भाव)", "प्रतिस्पर्धा, रोग, ऋण, शत्रु और दैनिक कार्यशैली का प्रतिनिधित्व करता है।"),
+                    ("सप्तम भाव (जाया भाव)", "विवाह, जीवनसाथी, साझेदारी, व्यापारिक संबंध और समाज में प्रतिष्ठा का भाव है।"),
+                    ("अष्टम भाव (आयु भाव)", "आयु, गुप्त ज्ञान, अचानक होने वाले लाभ/हानि, शोध और गूढ़ रहस्यों का भाव है।"),
+                    ("नवम भाव (भाग्य भाव)", "भाग्य, धर्म, गुरुजनों का मार्गदर्शन, उच्च ज्ञान और लंबी यात्राओं का भाव है।"),
+                    ("दशम भाव (कर्म भाव)", "करियर, कार्यक्षेत्र, सामाजिक प्रतिष्ठा, अधिकार और आजीविका का मुख्य स्थान है।"),
+                    ("एकदश भाव (लाभ भाव)", "आय के स्रोत, इच्छा पूर्ति, बड़े भाई-बहन और वित्तीय लाभ का प्रतीक है।"),
+                    ("द्वादश भाव (व्यय भाव)", "विदेश यात्रा, व्यय, मोक्ष, अस्पताल/एकांतवास और गुप्त शत्रुओं का भाव है।")
+                ]
 
-        # 4. ALL 9 PLANETS DETAILED ANALYSIS
-        st.subheader("4. नवग्रहों का स्थिति अनुसार विस्तृत विश्लेषण")
+                for house_num in range(1, 13):
+                    h_sign_idx = (asc_sign + house_num - 1) % 12
+                    h_sign_name = SIGNS[h_sign_idx]
+                    h_lord = RASHI_LORDS[h_sign_idx]
+                    planets_here = [p for p, s_idx in planet_positions_map.items() if s_idx == h_sign_idx]
+                    h_title, h_desc = house_details[house_num - 1]
 
-        for pl_name in PLANETS.keys():
-            pl_sign_i = planet_positions_map[pl_name]
-            pl_house = ((pl_sign_i - asc_sign) % 12) + 1
-            with st.expander(f"🔮 {pl_name} — {pl_house}वें भाव में ({SIGNS[pl_sign_i]} राशि)", expanded=True):
-                st.write(f"• **ग्रह स्थिति:** {pl_name} आपकी कुंडली के {pl_house}वें भाव में {SIGNS_HI[pl_sign_i]} राशि में विराजमान हैं।")
-                st.write(f"• **प्रभाव व फलादेश:** {pl_name} का {pl_house}वें भाव में होना यह दर्शाता है कि आपका ध्यान और ऊर्जा जीवन के इस क्षेत्र पर केंद्रित रहेगी। यह स्थिति आपके व्यवहार, निर्णय क्षमता और करियर के दृष्टिकोण पर सकारात्मक व महत्वपूर्ण प्रभाव डालती है।")
+                    with st.expander(f"📍 {house_num}. {h_title} — राशि: {h_sign_name} ({SIGNS_HI[h_sign_idx]})", expanded=True):
+                        st.write(f"• **भाव का महत्व:** {h_desc}")
+                        st.write(f"• **भाव स्वामी (House Lord):** `{h_lord}`")
+                        st.write(f"• **स्थित ग्रह:** `{', '.join(planets_here) if planets_here else 'खाली भाव (कोई ग्रह नहीं)'}`")
+                        st.write(f"• **विस्तृत विश्लेषण:** इस भाव में {SIGNS_HI[h_sign_idx]} राशि स्थित होने के कारण, स्वामी `{h_lord}` की स्थिति आपके जीवन के इस क्षेत्र में महत्वपूर्ण भूमिका निभाएगी।")
 
-        # 5. DASHA TIMELINE
-        st.subheader("5. विंशोत्तरी महादशा एवं अंतर्दशा विस्तृत टाइमलाइन")
+                # 4. ALL 9 PLANETS DETAILED ANALYSIS
+                st.subheader("4. नवग्रहों का स्थिति अनुसार विस्तृत विश्लेषण")
 
-        moon_result, _ = swe.calc_ut(jd, swe.MOON, flags)
-        moon_degree = moon_result[0] % 360
-        nak_span = 360.0 / 27.0
-        moon_nak_idx = int(moon_degree / nak_span)
+                for pl_name in PLANETS.keys():
+                    pl_sign_i = planet_positions_map[pl_name]
+                    pl_house = ((pl_sign_i - asc_sign) % 12) + 1
+                    with st.expander(f"🔮 {pl_name} — {pl_house}वें भाव में ({SIGNS[pl_sign_i]} राशि)", expanded=True):
+                        st.write(f"• **ग्रह स्थिति:** {pl_name} आपकी कुंडली के {pl_house}वें भाव में {SIGNS_HI[pl_sign_i]} राशि में विराजमान हैं।")
 
-        deg_in_nak = moon_degree % nak_span
-        balance_fraction = 1.0 - (deg_in_nak / nak_span)
+                # 5. DASHA TIMELINE
+                st.subheader("5. विंशोत्तरी महादशा एवं अंतर्दशा विस्तृत टाइमलाइन")
 
-        first_md_lord_idx = moon_nak_idx % 9
-        first_md_lord = DASHA_LORDS[first_md_lord_idx]
-        first_md_years = DASHA_YEARS[first_md_lord]
-        remaining_first_md_years = first_md_years * balance_fraction
+                moon_result, _ = swe.calc_ut(jd, swe.MOON, flags)
+                moon_degree = moon_result[0] % 360
+                nak_span = 360.0 / 27.0
+                moon_nak_idx = int(moon_degree / nak_span)
 
-        all_md_rows = []
-        current_start_date = local_dt
+                deg_in_nak = moon_degree % nak_span
+                balance_fraction = 1.0 - (deg_in_nak / nak_span)
 
-        for m_idx in range(9):
-            md_lord_i = (first_md_lord_idx + m_idx) % 9
-            md_name = DASHA_LORDS[md_lord_i]
-            md_total_years = DASHA_YEARS[md_name]
+                first_md_lord_idx = moon_nak_idx % 9
+                first_md_lord = DASHA_LORDS[first_md_lord_idx]
+                first_md_years = DASHA_YEARS[first_md_lord]
+                remaining_first_md_years = first_md_years * balance_fraction
 
-            md_duration_years = remaining_first_md_years if m_idx == 0 else md_total_years
-            md_end_date = current_start_date + timedelta(days=md_duration_years * 365.25)
+                all_md_rows = []
+                current_start_date = local_dt
 
-            all_md_rows.append({
-                "महादशा (Mahadasha)": md_name,
-                "प्रारंभ तिथि": current_start_date.strftime("%Y-%m-%d"),
-                "समाप्ति तिथि": md_end_date.strftime("%Y-%m-%d"),
-                "अवधि (वर्ष)": round(md_duration_years, 2)
-            })
-            current_start_date = md_end_date
+                for m_idx in range(9):
+                    md_lord_i = (first_md_lord_idx + m_idx) % 9
+                    md_name = DASHA_LORDS[md_lord_i]
+                    md_total_years = DASHA_YEARS[md_name]
 
-        st.dataframe(all_md_rows, use_container_width=True)
+                    md_duration_years = remaining_first_md_years if m_idx == 0 else md_total_years
+                    md_end_date = current_start_date + timedelta(days=md_duration_years * 365.25)
 
-    except Exception as e:
-        st.error(f"Calculation error: {e}")
-        
+                    all_md_rows.append({
+                        "महादशा (Mahadasha)": md_name,
+                        "प्रारंभ तिथि": current_start_date.strftime("%Y-%m-%d"),
+                        "समाप्ति तिथि": md_end_date.strftime("%Y-%m-%d"),
+                        "अवधि (वर्ष)": round(md_duration_years, 2)
+                    })
+                    current_start_date = md_end_date
+
+                st.dataframe(all_md_rows, use_container_width=True)
+
+        except Exception as e:
+            st.error(f"Calculation error: {e}")
+                
