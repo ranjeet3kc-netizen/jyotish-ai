@@ -189,8 +189,7 @@ if submitted:
             "Shani": "Shani",
             "Rahu": "Rahu",
             "Ketu": "Ketu"
-                }
-        }
+            }
 
         st.subheader("D1 जन्म कुंडली — उत्तर भारतीय शैली")
 
