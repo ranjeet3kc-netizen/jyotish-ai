@@ -105,6 +105,7 @@ def get_navamsha_sign(abs_degree):
         start = (d1_sign + 4) % 12
 
     return (start + navamsha_num) % 12
+         
 
 def antardashas(md_lord, md_start):
     """Full 9 antardashas of a mahadasha. md_start must be the *true* start
