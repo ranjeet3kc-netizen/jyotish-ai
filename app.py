@@ -180,14 +180,6 @@ def render_north_indian_chart(asc_sign, planet_signs, title):
     ax.axis("off")
     ax.set_title(title, fontsize=12, pad=10, color="maroon", weight="bold")
     return fig
-    import re
-
-def clean_text_for_pdf(text):
-    """हिंदी/देवनागरी अक्षरों को हटाकर केवल ASCII टेक्स्ट रखता है"""
-    # अगर टेक्स्ट में ब्रैकेट्स में इंग्लिश लिखी है (जैसे 'Budhaditya Yoga'), उसे निकालेगा
-    # और बाकी गैर-लैटिन अक्षरों को सुरक्षित हटा देगा
-    return text.encode('ascii', 'ignore').decode('ascii').strip(" :-()")
-    
     import io
 
 def generate_pdf_report(name, dob_str, place_str, asc_sign_name, moon_sign_name, 
