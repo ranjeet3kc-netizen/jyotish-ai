@@ -183,6 +183,11 @@ def render_north_indian_chart(asc_sign, planet_signs, title):
     import io
 
 def generate_pdf_report(name, dob_str, place_str, asc_sign_name, moon_sign_name, active_md, active_ad, yoga_list, rows_data=None, fig_chart=None, dasha_rows=None):
+    def clean_text(txt):
+        if not txt:
+            return ""
+        return str(txt).encode('ascii', 'ignore').decode('ascii')
+
     pdf = FPDF(orientation='P', unit='mm', format='A4')
     pdf.set_margins(left=15, top=15, right=15)
     pdf.add_page()
@@ -192,17 +197,17 @@ def generate_pdf_report(name, dob_str, place_str, asc_sign_name, moon_sign_name,
     pdf.cell(180, 10, "JYOTISH AI - DETAILED HOROSCOPE REPORT", ln=True, align="C")
     pdf.ln(5)
 
-    # Basic Info
+    # Basic Info with strict ASCII cleaning
     pdf.set_font("Helvetica", "B", 11)
     pdf.cell(180, 8, "Personal & Birth Details:", ln=True)
     pdf.set_font("Helvetica", "", 10)
     
-    pdf.multi_cell(180, 6, f"Name: {name}")
-    pdf.multi_cell(180, 6, f"Date of Birth: {dob_str}")
-    pdf.multi_cell(180, 6, f"Place of Birth: {place_str}")
-    pdf.multi_cell(180, 6, f"Lagna Rashi (Ascendant): {asc_sign_name}")
-    pdf.multi_cell(180, 6, f"Moon Rashi: {moon_sign_name}")
-    pdf.multi_cell(180, 6, f"Current Active Dasha: {active_md} Mahadasha - {active_ad} Antardasha")
+    pdf.multi_cell(180, 6, clean_text(f"Name: {name}"))
+    pdf.multi_cell(180, 6, clean_text(f"Date of Birth: {dob_str}"))
+    pdf.multi_cell(180, 6, clean_text(f"Place of Birth: {place_str}"))
+    pdf.multi_cell(180, 6, clean_text(f"Lagna Rashi (Ascendant): {asc_sign_name}"))
+    pdf.multi_cell(180, 6, clean_text(f"Moon Rashi: {moon_sign_name}"))
+    pdf.multi_cell(180, 6, clean_text(f"Current Active Dasha: {active_md} Mahadasha - {active_ad} Antardasha"))
     pdf.ln(5)
 
     # Yogas Section
@@ -211,8 +216,7 @@ def generate_pdf_report(name, dob_str, place_str, asc_sign_name, moon_sign_name,
     pdf.set_font("Helvetica", "", 10)
     if yoga_list:
         for y in yoga_list:
-            clean_y = str(y).encode('ascii', 'ignore').decode('ascii')
-            pdf.multi_cell(180, 6, f"- {clean_y}")
+            pdf.multi_cell(180, 6, clean_text(f"- {y}"))
     else:
         pdf.multi_cell(180, 6, "- General auspicious yoga present.")
     
@@ -221,6 +225,7 @@ def generate_pdf_report(name, dob_str, place_str, asc_sign_name, moon_sign_name,
     pdf.cell(180, 6, "Generated successfully by Jyotish AI Engine.", ln=True, align="C")
 
     return pdf.output()
+    
     
     # --- Page Setup ---
 st.set_page_config(page_title="Jyotish AI - विस्तृत महा जन्मपत्री", page_icon="🔱", layout="wide")
