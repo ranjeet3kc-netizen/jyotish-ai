@@ -188,39 +188,39 @@ def generate_pdf_report(name, dob_str, place_str, asc_sign_name, moon_sign_name,
     pdf.set_auto_page_break(auto=True, margin=15)
     
     # Header
-    pdf.set_font("Helvetica", "B", 16)
-    pdf.cell(0, 10, "JYOTISH AI - DETAILED HOROSCOPE REPORT", ln=True, align="C")
-    pdf.ln(5)
+    pdf.set_font("Helvetica", "B", 14)
+    pdf.cell(0, 8, "JYOTISH AI - DETAILED HOROSCOPE REPORT", ln=True, align="C")
+    pdf.ln(4)
 
     # Basic Info
-    pdf.set_font("Helvetica", "B", 12)
-    pdf.cell(0, 8, "Personal & Birth Details:", ln=True)
+    pdf.set_font("Helvetica", "B", 11)
+    pdf.cell(0, 7, "Personal & Birth Details:", ln=True)
     pdf.set_font("Helvetica", "", 10)
-    pdf.cell(0, 6, f"Name: {name}", ln=True)
-    pdf.cell(0, 6, f"Date of Birth: {dob_str}", ln=True)
-    pdf.cell(0, 6, f"Place of Birth: {place_str}", ln=True)
-    pdf.cell(0, 6, f"Lagna Rashi (Ascendant): {asc_sign_name}", ln=True)
-    pdf.cell(0, 6, f"Moon Rashi: {moon_sign_name}", ln=True)
-    pdf.cell(0, 6, f"Current Active Dasha: {active_md} Mahadasha - {active_ad} Antardasha", ln=True)
-    pdf.ln(5)
+    
+    # Using multi_cell to prevent space errors
+    pdf.multi_cell(0, 6, f"Name: {name}")
+    pdf.multi_cell(0, 6, f"Date of Birth: {dob_str}")
+    pdf.multi_cell(0, 6, f"Place of Birth: {place_str}")
+    pdf.multi_cell(0, 6, f"Lagna Rashi (Ascendant): {asc_sign_name}")
+    pdf.multi_cell(0, 6, f"Moon Rashi: {moon_sign_name}")
+    pdf.multi_cell(0, 6, f"Current Active Dasha: {active_md} Mahadasha - {active_ad} Antardasha")
+    pdf.ln(4)
 
     # Yogas Section
-    pdf.set_font("Helvetica", "B", 12)
-    pdf.cell(0, 8, "Key Yogas & Horoscope Analysis:", ln=True)
+    pdf.set_font("Helvetica", "B", 11)
+    pdf.cell(0, 7, "Key Yogas & Horoscope Analysis:", ln=True)
     pdf.set_font("Helvetica", "", 10)
     for y in yoga_list:
-        # English conversion or clean text fallback
         clean_y = str(y).encode('ascii', 'ignore').decode('ascii')
         pdf.multi_cell(0, 6, f"- {clean_y}")
     
-    pdf.ln(5)
+    pdf.ln(4)
     pdf.set_font("Helvetica", "I", 9)
     pdf.cell(0, 6, "Generated successfully by Jyotish AI Engine.", ln=True, align="C")
 
     return pdf.output()
     
-                            
-# --- Page Setup ---
+    # --- Page Setup ---
 st.set_page_config(page_title="Jyotish AI - विस्तृत महा जन्मपत्री", page_icon="🔱", layout="wide")
 
 st.markdown(
