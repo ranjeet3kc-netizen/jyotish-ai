@@ -179,16 +179,17 @@ if submitted:
                 "Rashi": sign_name,
                 "Grah": planets_here if planets_here else "-"
             })
-        hindi_planets = {
-            "Surya": "सूर्य",
-            "Chandra": "चंद्र",
-            "Mangal": "मंगल",
-            "Budh": "बुध",
-            "Guru": "गुरु",
-            "Shukra": "शुक्र",
-            "Shani": "शनि",
-            "Rahu": "राहु",
-            "Ketu": "केतु"
+                hindi_planets = {
+            "Surya": "Surya",
+            "Chandra": "Chandra",
+            "Mangal": "Mangal",
+            "Budh": "Budh",
+            "Guru": "Guru",
+            "Shukra": "Shukra",
+            "Shani": "Shani",
+            "Rahu": "Rahu",
+            "Ketu": "Ketu"
+                }
         }
 
         st.subheader("D1 जन्म कुंडली — उत्तर भारतीय शैली")
