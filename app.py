@@ -187,40 +187,115 @@ def clean_text_for_pdf(text):
     # अगर टेक्स्ट में ब्रैकेट्स में इंग्लिश लिखी है (जैसे 'Budhaditya Yoga'), उसे निकालेगा
     # और बाकी गैर-लैटिन अक्षरों को सुरक्षित हटा देगा
     return text.encode('ascii', 'ignore').decode('ascii').strip(" :-()")
-
-def generate_pdf_report(name, dob_str, place_str, asc_sign_name, moon_sign_name, active_md, active_ad, yoga_list):
-    pdf = FPDF()
-    pdf.add_page()
-    pdf.set_font("Helvetica", "B", 16)
-    pdf.cell(0, 10, "Jyotish AI - Detailed Horoscope Report", ln=True, align="C")
-    pdf.ln(5)
-
-    pdf.set_font("Helvetica", "", 12)
-    # clean_text_for_pdf से नाम और जगह के देवनागरी अक्षर सुरक्षित रहेंगे
-    pdf.cell(0, 8, f"Name: {clean_text_for_pdf(name) or name}", ln=True)
-    pdf.cell(0, 8, f"Date of Birth: {dob_str}", ln=True)
-    pdf.cell(0, 8, f"Place: {clean_text_for_pdf(place_str) or 'Standard Location'}", ln=True)
-    pdf.cell(0, 8, f"Lagna Rashi: {asc_sign_name}", ln=True)
-    pdf.cell(0, 8, f"Moon Rashi: {moon_sign_name}", ln=True)
-    pdf.cell(0, 8, f"Active Mahadasha: {active_md}", ln=True)
-    pdf.cell(0, 8, f"Active Antardasha: {active_ad}", ln=True)
-    pdf.ln(5)
-
-    pdf.set_font("Helvetica", "B", 14)
-    pdf.cell(0, 10, "Key Yogas & Analysis:", ln=True)
-    pdf.set_font("Helvetica", "", 11)
     
+    import io
+
+def generate_pdf_report(name, dob_str, place_str, asc_sign_name, moon_sign_name, 
+                        active_md, active_ad, yoga_list, rows_data, fig_chart, dasha_rows):
+    pdf = FPDF()
+    pdf.set_auto_page_break(auto=True, margin=15)
+    pdf.add_page()
+
+    # --- Header ---
+    pdf.set_font("Helvetica", "B", 18)
+    pdf.set_text_color(128, 0, 0)
+    pdf.cell(0, 10, "JYOTISH AI - DETAILED HOROSCOPE REPORT", ln=True, align="C")
+    pdf.set_font("Helvetica", "I", 10)
+    pdf.set_text_color(100, 100, 100)
+    pdf.cell(0, 5, "Vedic Astrology Calculations & Astrological Analysis", ln=True, align="C")
+    pdf.ln(5)
+
+    # --- Basic Info Table ---
+    pdf.set_font("Helvetica", "B", 12)
+    pdf.set_text_color(0, 0, 0)
+    pdf.cell(0, 8, "Personal & Birth Details:", ln=True)
+    pdf.set_font("Helvetica", "", 10)
+    
+    info_col1 = [
+        f"Name: {name}",
+        f"Date of Birth: {dob_str}",
+        f"Place: {place_str}"
+    ]
+    info_col2 = [
+        f"Lagna Rashi: {asc_sign_name}",
+        f"Moon Rashi: {moon_sign_name}",
+        f"Current Dasha: {active_md} - {active_ad}"
+    ]
+    
+    for c1, c2 in zip(info_col1, info_col2):
+        pdf.cell(95, 6, c1, border=0)
+        pdf.cell(95, 6, c2, border=0, ln=True)
+    pdf.ln(4)
+
+    # --- D1 Chart Image ---
+    pdf.set_font("Helvetica", "B", 12)
+    pdf.cell(0, 8, "Lagna Kundli (D1 Chart):", ln=True)
+    
+    img_buf = io.BytesIO()
+    fig_chart.savefig(img_buf, format="png", bbox_inches="tight", dpi=130)
+    img_buf.seek(0)
+    # 70x70 mm का चार्ट सेंटर में प्रिंट होगा
+    chart_x = (210 - 75) / 2
+    pdf.image(img_buf, x=chart_x, w=75)
+    pdf.ln(5)
+
+    # --- Planetary Positions Table ---
+    pdf.set_font("Helvetica", "B", 12)
+    pdf.cell(0, 8, "Planetary Positions (Graha Sthiti):", ln=True)
+    
+    pdf.set_font("Helvetica", "B", 9)
+    pdf.set_fill_color(230, 230, 230)
+    pdf.cell(32, 6, "Planet", border=1, fill=True)
+    pdf.cell(32, 6, "D1 Sign", border=1, fill=True)
+    pdf.cell(30, 6, "Degree", border=1, fill=True)
+    pdf.cell(38, 6, "Nakshatra", border=1, fill=True)
+    pdf.cell(30, 6, "D9 Navamsha", border=1, fill=True)
+    pdf.cell(28, 6, "Status", border=1, fill=True, ln=True)
+
+    pdf.set_font("Helvetica", "", 8.5)
+    for r in rows_data:
+        p_name = r["Planet"].encode('ascii', 'ignore').decode('ascii')
+        pdf.cell(32, 5.5, p_name, border=1)
+        pdf.cell(32, 5.5, str(r["D1 Rashi"]), border=1)
+        pdf.cell(30, 5.5, f"{r['Degree']} deg", border=1)
+        pdf.cell(38, 5.5, str(r["Nakshatra"]), border=1)
+        pdf.cell(30, 5.5, str(r["D9 Navamsha Rashi"]), border=1)
+        pdf.cell(28, 5.5, str(r["Status"]), border=1, ln=True)
+    pdf.ln(4)
+
+    # --- Dasha Overview ---
+    pdf.set_font("Helvetica", "B", 12)
+    pdf.cell(0, 8, "Vimshottari Mahadasha Timeline:", ln=True)
+    pdf.set_font("Helvetica", "B", 9)
+    pdf.set_fill_color(230, 230, 230)
+    pdf.cell(45, 6, "Mahadasha Lord", border=1, fill=True)
+    pdf.cell(45, 6, "Start Date", border=1, fill=True)
+    pdf.cell(45, 6, "End Date", border=1, fill=True)
+    pdf.cell(35, 6, "Duration (Years)", border=1, fill=True, ln=True)
+
+    pdf.set_font("Helvetica", "", 8.5)
+    for d in dasha_rows[:9]:  # मुख्य 9 महादशाएं
+        md_name = d["महादशा (Mahadasha)"]
+        is_cur = " (Current)" if "सक्रिय" in d["स्थिति"] else ""
+        pdf.cell(45, 5.5, f"{md_name}{is_cur}", border=1)
+        pdf.cell(45, 5.5, str(d["प्रारंभ तिथि"]), border=1)
+        pdf.cell(45, 5.5, str(d["समाप्ति तिथि"]), border=1)
+        pdf.cell(35, 5.5, str(d["अवधि (वर्ष)"]), border=1, ln=True)
+    pdf.ln(4)
+
+    # --- Yogas ---
+    pdf.set_font("Helvetica", "B", 12)
+    pdf.cell(0, 8, "Key Astrological Yogas:", ln=True)
+    pdf.set_font("Helvetica", "", 9)
     for y in yoga_list:
-        # केवल अंग्रेजी वाला हिस्सा PDF में प्रिंट होगा (जैसे: Budhaditya Yoga)
-        clean_y = clean_text_for_pdf(y)
+        clean_y = y.encode('ascii', 'ignore').decode('ascii').strip(" :-()")
         if clean_y:
-            pdf.cell(0, 7, f"- {clean_y}", ln=True)
+            pdf.cell(0, 6, f"- {clean_y}", ln=True)
         else:
-            pdf.cell(0, 7, "- Auspicious planetary alignment present", ln=True)
+            pdf.cell(0, 6, "- Auspicious Rajyoga / Dhanyoga present in chart", ln=True)
 
     return pdf.output()
-    
-
+                            
 # --- Page Setup ---
 st.set_page_config(page_title="Jyotish AI - विस्तृत महा जन्मपत्री", page_icon="🔱", layout="wide")
 
