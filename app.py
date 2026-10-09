@@ -205,8 +205,7 @@ if submitted:
         hindi_font = fm.FontProperties(fname=font_path)
 
         fig, ax = plt.subplots(figsize=(7, 7))
-        st.write("Font path:", font_path)
-        st.write("Font exists:", os.path.exists(font_path))
+        
         # Outer square
         ax.plot(
             [0, 1, 1, 0, 0],
