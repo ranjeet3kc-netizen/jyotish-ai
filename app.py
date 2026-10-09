@@ -272,7 +272,7 @@ if submitted:
                 hour24 += 12
             bt = time(hour24, minute)
 
-            geolocator = Nominatim(user_agent="jyotish_app_v13")
+            geolocator = Nominatim(user_agent="jyotish_app_v14")
             location = geolocator.geocode(place)
 
             if not location:
@@ -314,6 +314,7 @@ if submitted:
                 d1_planet_signs = {}
                 d9_planet_signs = {}
                 planet_positions_map = {}
+                moon_sign_idx = 0  # Fixed variable
 
                 for planet, code in PLANETS.items():
                     res = swe.calc_ut(jd, code, flags)
@@ -328,6 +329,9 @@ if submitted:
                     nak_index = int(degree / (360 / 27))
 
                     planet_positions_map[planet] = sign_index
+                    if planet == "Chandra":
+                        moon_sign_idx = sign_index
+
                     d9_sign_index = get_navamsha_sign(degree)
 
                     rows.append({
@@ -387,73 +391,13 @@ if submitted:
                     st.pyplot(fig_d9)
                     plt.close(fig_d9)
 
-                # 3. HEALTH & WELLNESS DEEP ANALYSIS
-                section_heading("3. स्वास्थ्य एवं शारीरिक आरोग्य का विस्तृत विश्लेषण (Health Report)", "🏥")
+                # 3. DASHA & ANTARDASHA (ACCURATE CALCULATION)
+                section_heading("3. महादशा एवं अंतर्दशा का अति-विस्तृत फलादेश (Dasha Analysis)", "⏳")
 
-                sixth_sign_idx = (asc_sign + 5) % 12
-                sixth_lord = RASHI_LORDS[sixth_sign_idx]
-                planets_in_6th = [p for p, s_idx in planet_positions_map.items() if s_idx == sixth_sign_idx]
-
-                with st.expander("🏥 रोग प्रतिरोधक क्षमता, संभावित स्वास्थ्य चुनौतियां एवं विस्तृत उपाय", expanded=True):
-                    st.write(f"• **षष्ठ भाव (रोग व प्रतिरोधक क्षमता):** आपकी कुंडली में षष्ठ भाव में **{SIGNS[sixth_sign_idx]} ({SIGNS_HI[sixth_sign_idx]})** राशि स्थित है, जिसके स्वामी **{sixth_lord}** हैं।")
-                    st.write(f"• **प्राकृतिक स्वास्थ्य प्रवृत्तियां:** {HEALTH_MAP.get(sixth_lord, 'सामान्य स्वास्थ्य उत्तम रहेगा।')}")
-                    st.write("""
-                    वैदिक सिद्धांत के अनुसार प्रथम भाव (शरीर व आत्मबल) और षष्ठ भाव (रोग व प्रतिरोधकता) का संतुलन स्वास्थ्य को निर्धारित करता है। यदि आप संतुलित जीवनशैली अपनाते हैं, नित्य प्रातः प्राणायाम करते हैं और आहार में ताजे फलों व जल का उचित समावेश रखते हैं, तो आपकी शारीरिक ऊर्जा हमेशा उच्च स्तर पर बनी रहेगी।
-                    """)
-                    if planets_in_6th:
-                        st.write(f"• **षष्ठ भाव में स्थित ग्रह (`{', '.join(planets_in_6th)}`):** इस भाव में ग्रहों की उपस्थिति आपको स्वास्थ्य के प्रति अधिक सतर्क रहने का संकेत देती है। मौसमी बदलाव के समय विशेष सावधानी बरतें।")
-
-                # 4. LOVE, AFFAIRS & RELATIONSHIPS DEEP ANALYSIS
-                section_heading("4. प्रेम, लव-अफेयर्स एवं संबंधों का विस्तृत विश्लेषण (Love & Relationships)", "❤️")
-
-                fifth_sign_idx = (asc_sign + 4) % 12
-                fifth_lord = RASHI_LORDS[fifth_sign_idx]
-                planets_in_5th = [p for p, s_idx in planet_positions_map.items() if s_idx == fifth_sign_idx]
-
-                with st.expander("❤️ प्रेम संबंध, भावनात्मक जुड़ाव एवं विवाह संभावनाओं का गहन विश्लेषण", expanded=True):
-                    st.write(f"• **पंचम भाव (प्रेम व भावुकता):** पंचम भाव में **{SIGNS[fifth_sign_idx]} ({SIGNS_HI[fifth_sign_idx]})** राशि है, जिसके स्वामी **{fifth_lord}** हैं।")
-                    st.write(f"""
-                    आपके जीवन में प्रेम संबंधों का आधार भावनात्मक गहराई और परस्पर विश्वास रहेगा। आप अपने साथी के प्रति समर्पित और निष्ठावान रहने वाले व्यक्ति हैं। जब भी आप किसी रिश्ते में प्रवेश करते हैं, तो उसे केवल अल्पकालिक न मानकर गंभीरता से निभाते हैं।
-                    """)
-                    if planets_in_5th:
-                        st.write(f"• **पंचम भाव में स्थित ग्रहों का प्रभाव (`{', '.join(planets_in_5th)}`):** ये ग्रह आपकी लव-लाइफ़ में भावनात्मक मोड़ और आकर्षण को बढ़ाते हैं। संवाद में स्पष्टता बनाए रखना आपके रिश्ते को और मजबूत करेगा।")
-                    
-                    if fifth_lord in [RASHI_LORDS[(asc_sign + 6) % 12], "Shukra", "Rahu"] or "Rahu" in planets_in_5th:
-                        st.write("• **विवाह स्वरूप योग:** आपकी कुंडली में प्रेम (5th) और विवाह (7th) स्थानों के बीच शुभ संबंध बनता दिख रहा है, जो यह दर्शाता है कि आपकी अपनी पसंद या प्रेम विवाह होने की प्रबल संभावनाएं हैं।")
-                    else:
-                        st.write("• **विवाह स्वरूप योग:** आपकी कुंडली में पारिवारिक सहमति और पारंपरिक रीति-रिवाजों द्वारा तय संबंध (Arranged Marriage) अत्यंत सुखद, स्थायी और भाग्योदय करने वाला सिद्ध होगा।")
-
-                # 5. YOGAS & RAJYOGA ANALYSIS
-                section_heading("5. कुंडली में स्थित प्रमुख राजयोग एवं धनयोग (Yogas & Rajyoga)", "👑")
-
-                detected_yogas = []
-                if planet_positions_map.get("Surya") == planet_positions_map.get("Budh"):
-                    detected_yogas.append("बुधादित्य योग (Budhaditya Yoga): सूर्य और बुध की युति से कुशाग्र बुद्धि, तीक्ष्ण निर्णय क्षमता, और समाज में प्रतिष्ठित स्थान प्राप्त होता है।")
-
-                guru_p = planet_positions_map.get("Guru")
-                chandra_p = planet_positions_map.get("Chandra")
-                if guru_p is not None and chandra_p is not None:
-                    diff = abs(guru_p - chandra_p) % 12
-                    if diff in [0, 3, 6, 9]:
-                        detected_yogas.append("गजकेसरी योग (Gajakesari Yoga): गुरु और चंद्रमा का केंद्र योग। यह योग जातक को असीम ज्ञान, धन, यश और स्थायी समृद्धि प्रदान करता है।")
-
-                mangal_p = planet_positions_map.get("Mangal")
-                mangal_house = ((mangal_p - asc_sign) % 12) + 1
-                if mangal_house in [1, 4, 7, 10] and mangal_p in [0, 7, 9]:
-                    detected_yogas.append("रूचक महापुरुष योग (Ruchaka Yoga): मंगल का केंद्र में बलवान होना। असीम पराक्रम, अचल संपत्ति, और नेतृत्व क्षमता प्रदान करता है।")
-
-                if not detected_yogas:
-                    detected_yogas.append("आपकी कुंडली में कर्मेश और भाग्येश का शुभ संबंध निर्मित हो रहा है, जो सतत परिश्रम से धन और मान-सम्मान दिलाता है।")
-
-                for y in detected_yogas:
-                    st.success(f"• {y}")
-
-                # 6. DASHA & ANTARDASHA
-                section_heading("6. महादशा एवं अंतर्दशा का अति-विस्तृत फलादेश (Dasha Analysis)", "⏳")
-
+                moon_res = swe.calc_ut(jd, swe.MOON, flags)
                 moon_degree = moon_res[0][0] % 360
-                moon_sign_idx = int(moon_degree // 30)
                 nak_span = 360.0 / 27.0
+                moon_nak_idx = int(moon_degree / nak_span)
 
                 deg_in_nak = moon_degree % nak_span
                 balance_fraction = 1.0 - (deg_in_nak / nak_span)
@@ -506,108 +450,64 @@ if submitted:
                 if active_md and active_ad:
                     with st.expander(f"🌟 वर्तमान सक्रिय महादशा ({active_md}) एवं अंतर्दशा ({active_ad}) का विस्तृत प्रभाव", expanded=True):
                         st.write(f"• **महादशापति ({active_md}) का प्रभाव:** {MAHADASHA_PREDICTIONS.get(active_md, 'यह कालखंड आपके जीवन में नए अवसर लाएगा।')}")
-                        st.write(f"• **अंतर्दशापति ({active_ad}) का प्रभाव:** वर्तमान समय में आपके दैनिक निर्णयों, मानसिक रुझान, और अल्पकालिक परिणामों पर {active_ad} का मुख्य प्रभाव है।")
+                        st.write(f"• **अंतर्दशापति ({active_ad}) का प्रभाव:** वर्तमान समय में आपके दैनिक निर्णयों और परिणामों पर {active_ad} का मुख्य प्रभाव है।")
+
+                # 4. HEALTH & WELLNESS ANALYSIS
+                section_heading("4. स्वास्थ्य एवं शारीरिक आरोग्य का विस्तृत विश्लेषण (Health Report)", "🏥")
+
+                sixth_sign_idx = (asc_sign + 5) % 12
+                sixth_lord = RASHI_LORDS[sixth_sign_idx]
+                planets_in_6th = [p for p, s_idx in planet_positions_map.items() if s_idx == sixth_sign_idx]
+
+                with st.expander("🏥 रोग प्रतिरोधक क्षमता एवं स्वास्थ्य सावधानियां", expanded=True):
+                    st.write(f"• **षष्ठ भाव (रोग स्थान):** इस भाव में **{SIGNS[sixth_sign_idx]} ({SIGNS_HI[sixth_sign_idx]})** राशि है, जिसके स्वामी **{sixth_lord}** हैं।")
+                    st.write(f"• **स्वाभाविक प्रवृत्ति:** {HEALTH_MAP.get(sixth_lord, 'स्वास्थ्य उत्तम रहेगा।')}")
+
+                # 5. LOVE & RELATIONSHIPS
+                section_heading("5. प्रेम, लव-अफेयर्स एवं संबंध (Love & Relationships)", "❤️")
+
+                fifth_sign_idx = (asc_sign + 4) % 12
+                fifth_lord = RASHI_LORDS[fifth_sign_idx]
+
+                with st.expander("❤️ प्रेम संबंध एवं विवाह संभावनाएं", expanded=True):
+                    st.write(f"• **पंचमेश ({fifth_lord}):** आपके रिश्तों में भावनात्मक गहराई और आपसी विश्वास मुख्य भूमिका निभाएगा।")
+
+                # 6. YOGAS & RAJYOGA ANALYSIS
+                section_heading("6. कुंडली में स्थित प्रमुख राजयोग एवं धनयोग", "👑")
+
+                detected_yogas = []
+                if planet_positions_map.get("Surya") == planet_positions_map.get("Budh"):
+                    detected_yogas.append("बुधादित्य योग (Budhaditya Yoga): सूर्य और बुध की युति से कुशाग्र बुद्धि और मान-सम्मान प्राप्त होता है।")
+
+                guru_p = planet_positions_map.get("Guru")
+                chandra_p = planet_positions_map.get("Chandra")
+                if guru_p is not None and chandra_p is not None:
+                    diff = abs(guru_p - chandra_p) % 12
+                    if diff in [0, 3, 6, 9]:
+                        detected_yogas.append("गजकेसरी योग (Gajakesari Yoga): असीम ज्ञान, धन और स्थायी समृद्धि प्रदान करता है।")
+
+                if not detected_yogas:
+                    detected_yogas.append("आपकी कुंडली में कर्मेश और भाग्येश का शुभ संबंध निर्मित हो रहा है।")
+
+                for y in detected_yogas:
+                    st.success(f"• {y}")
 
                 # 7. AGE-WISE PREDICTIONS
-                section_heading("7. जीवन कालखंड अनुसार अति-विस्तृत महा-फलादेश (Age-wise Horoscope)", "🔮")
+                section_heading("7. जीवन कालखंड अनुसार अति-विस्तृत महा-फलादेश", "🔮")
 
-                with st.expander("🎓 20 से 30 वर्ष की आयु: शिक्षा, कौशल विकास एवं आजीविका का निर्माण", expanded=True):
-                    st.write("""
-                    • **करियर एवं कार्यक्षेत्र की नींव:** यह दशक आपके जीवन की दिशा तय करने वाला सबसे महत्वपूर्ण कालखंड है। इस अवधि में आपका मुख्य ध्यान अपने कौशल (Skill Set), व्यावहारिक ज्ञान, और तकनीकी दक्षता को निखारने पर होना चाहिए। शुरुआती वर्षों (20-23 वर्ष) में अत्यधिक प्रयास और अपेक्षाकृत धीमा परिणाम देखने को मिल सकता है, परंतु 24 से 27 वर्ष की आयु के मध्य करियर में पहला बड़ा ब्रेक या स्थायी अवसर प्राप्त होता है।
-                    
-                    • **आर्थिक प्रगति व परिपक्वता:** 26 वर्ष की आयु के पश्चात आपकी कमाई में निरंतरता और आर्थिक निर्णय लेने में स्पष्ट परिपक्वता आने लगेगी। इस समय में वित्तीय अनुशासन बनाए रखना आपके भविष्य के लिए वरदान सिद्ध होगा।
-                    """)
+                with st.expander("🎓 20 से 30 वर्ष की आयु: शिक्षा, कौशल विकास एवं आजीविका", expanded=True):
+                    st.write("• **करियर निर्माण:** 24 से 27 वर्ष की आयु के मध्य करियर में पहला बड़ा ब्रेक या अवसर प्राप्त होता है।")
 
-                with st.expander("💍 25 से 35 वर्ष की आयु: विवाह, दांपत्य जीवन एवं पारिवारिक जिम्मेदारियां", expanded=True):
-                    st.write("""
-                    • **विवाह एवं दांपत्य सुख:** यह कालखंड गृहस्थ जीवन में प्रवेश करने और नए पारिवारिक संबंधों को स्थापित करने का उत्तम समय है। कुंडली के शुभ योगों के प्रभाव से आपका जीवनसाथी समझदार, जिम्मेदार, और व्यावहारिक दृष्टिकोण वाला होगा।
-                    
-                    • **भाग्योदय व सामाजिक मान-प्रतिष्ठा:** विवाह के पश्चात आपके भाग्य की गति में तीव्रता आएगी। जीवनसाथी का सहयोग आपको न केवल मानसिक शांति देगा बल्कि आर्थिक फैसलों में भी सही राह दिखाएगा। घर में मांगलिक कार्य और नए सदस्यों का आगमन होगा।
-                    """)
+                with st.expander("💍 25 से 35 वर्ष की आयु: विवाह एवं पारिवारिक जिम्मेदारियां", expanded=True):
+                    st.write("• **दांपत्य सुख:** विवाह के पश्चात भाग्योदय की गति तेज़ होगी।")
 
-                with st.expander("🏢 35 से 50 वर्ष की आयु: स्व-अर्जित संपत्ति, अचल संपत्ति एवं स्थायी सफलता", expanded=True):
-                    st.write("""
-                    • **अचल संपत्ति व भूमि-भवन योग:** यह आपके जीवन का सबसे समृद्ध और फलदायी दौर सिद्ध होगा। वर्षों के अनुभव, कड़ी मेहनत और सूझबूझ के बल पर आप अपनी खुद की संपत्ति (मकान, भूमि, या व्यावसायिक स्थान) का निर्माण करने में सफल होंगे।
-                    
-                    • **स्थायी सफलता व नेतृत्व:** इस उम्र में आप दूसरों के अधीन काम करने की बजाय स्वतंत्र रूप से निर्णय लेने और बड़े प्रोजेक्ट्स को संभालने की स्थिति में होंगे। समाज और व्यापारिक क्षेत्र में आपका कद और प्रतिष्ठा चरम पर रहेगी।
-                    """)
-
-                # 8. GEMSTONE & RUDRAKSHA SUGGESTIONS
-                section_heading("8. शुभ रत्न, रुद्राक्ष एवं भाग्यशाली समाधान (Remedies)", "💎")
+                # 8. REMEDIES & PDF DOWNLOAD
+                section_heading("8. शुभ रत्न, रुद्राक्ष एवं उपाय (Remedies)", "💎")
 
                 lagna_lord = RASHI_LORDS[asc_sign]
-                fifth_sign = (asc_sign + 4) % 12
-                fifth_lord = RASHI_LORDS[fifth_sign]
-                ninth_sign = (asc_sign + 8) % 12
-                ninth_lord = RASHI_LORDS[ninth_sign]
+                st.write(f"• **जीवनरत्न:** `{GEMSTONES.get(lagna_lord, 'नेचुरल ओपल')}`")
+                st.write(f"• **रुद्राक्ष:** **{RUDRAKSHA.get(lagna_lord, '5 मुखी रुद्राक्ष')}**")
 
-                col_g1, col_g2, col_g3 = st.columns(3)
-                with col_g1:
-                    st.info(f"**जीवनरत्न (Lagna Stone):**\n\n`{GEMSTONES.get(lagna_lord, 'नेचुरल ओपल')}`\n\n(स्वास्थ्य, व्यक्तित्व व आत्मबल हेतु)")
-                with col_g2:
-                    st.success(f"**ज्ञान व बुद्धि रत्न (5th Stone):**\n\n`{GEMSTONES.get(fifth_lord, 'पुखराज')}`\n\n(शिक्षा, निर्णय शक्ति व संतान सुख हेतु)")
-                with col_g3:
-                    st.warning(f"**भाग्यरत्न (9th Lucky Stone):**\n\n`{GEMSTONES.get(ninth_lord, 'माणिक्य')}`\n\n(किस्मत, पद-प्रतिष्ठा व भाग्यवृद्धि हेतु)")
-
-                st.write(f"• **उपयुक्त रुद्राक्ष:** आपकी कुंडली के अनुसार आपके लिए **{RUDRAKSHA.get(lagna_lord, '5 मुखी रुद्राक्ष')}** धारण करना मानसिक शांति और सकारात्मक ऊर्जा के लिए सर्वोत्तम रहेगा।")
-
-                # 9. CAREER & MARRIAGE PREDICTIONS
-                section_heading("9. ग्रहों के अनुसार उपयुक्त करियर एवं विवाह फलादेश", "💼")
-
-                karma_sign_idx = (asc_sign + 9) % 12
-                karma_lord = RASHI_LORDS[karma_sign_idx]
-
-                with st.expander("💼 आपके लिए उपयुक्त काम/बिज़नेस क्षेत्र", expanded=True):
-                    st.write(f"• **कर्मेश ({karma_lord}) के अनुसार सबसे सफल क्षेत्र:** {CAREER_MAP.get(karma_lord, 'व्यापार व स्वतंत्र रोजगार')}")
-
-                partner_label = "पत्नी (Wife)" if "Male" in gender else "पति (Husband)"
-                marriage_sign_idx = (asc_sign + 6) % 12
-                marriage_lord = RASHI_LORDS[marriage_sign_idx]
-
-                with st.expander(f"💍 {gender} विशेष — विवाह एवं {partner_label} का स्वभाव", expanded=True):
-                    st.write(f"• **सप्तमेश ({marriage_lord}) का प्रभाव:** आपका जीवनसाथी सुलझा हुआ, व्यावहारिक और पारिवारिक जिम्मेदारियों को कुशलता से निभाने वाला होगा।")
-
-                # 10. ALL 12 HOUSES ANALYSIS
-                section_heading("10. समस्त 12 भावों का अति-विस्तृत फलादेश (12 Bhav Analysis)", "🏛️")
-
-                house_details = [
-                    ("प्रथम भाव (तनु भाव)", "व्यक्तित्व, शारीरिक सौष्ठव, आत्मबल, विचार और स्वास्थ्य का प्रतिनिधित्व करता है।"),
-                    ("द्वितीय भाव (धन भाव)", "कुटुंब, वाणी, प्रारंभिक शिक्षा, संचित धन और संपत्ति का भाव है।"),
-                    ("तृतीय भाव (सहज भाव)", "पराक्रम, कार्यक्षमता, साहस, संचार और भाई-बहनों का स्थान है।"),
-                    ("चतुर्थ भाव (सुख भाव)", "माता का सुख, घर का वातावरण, वाहन, भूमि और अचल संपत्ति का प्रतीक है।"),
-                    ("पंचम भाव (बुद्धि/प्रेम भाव)", "सोचने की क्षमता, बौद्धिक ज्ञान, प्रेम संबंध और संतान का भाव है।"),
-                    ("षष्ठ भाव (रिपु/रोग भाव)", "प्रतिस्पर्धा, दैनिक कार्यशैली, ऋण और स्वास्थ्य/रोग से निपटने का भाव है।"),
-                    ("सप्तम भाव (जाया भाव)", "वैवाहिक जीवन, जीवनसाथी का स्वभाव, साझेदारी और सामाजिक संबंध का भाव है।"),
-                    ("अष्टम भाव (आयु भाव)", "आयु, अचानक होने वाले परिवर्तन, शोध और गुप्त विद्याओं का स्थान है।"),
-                    ("नवम भाव (भाग्य भाव)", "भाग्योदय, धार्मिक आस्था, उच्च विचार और बड़ों के मार्गदर्शन का भाव है।"),
-                    ("दशम भाव (कर्म भाव)", "करियर, आजीविका, सामाजिक पद-प्रतिष्ठा और अधिकारों का मुख्य केंद्र है।"),
-                    ("एकदश भाव (लाभ भाव)", "आय के स्रोत, वित्तीय लाभ, मित्रों का सहयोग और मनोकामना पूर्ति का भाव है।"),
-                    ("द्वादश भाव (व्यय भाव)", "विदेश/दूरस्थ स्थानों से संबंध, खर्चे, आत्म-साक्षात्कार और बचत का भाव है।")
-                ]
-
-                for house_num in range(1, 13):
-                    h_sign_idx = (asc_sign + house_num - 1) % 12
-                    h_sign_name = SIGNS[h_sign_idx]
-                    h_lord = RASHI_LORDS[h_sign_idx]
-                    planets_here = [p for p, s_idx in planet_positions_map.items() if s_idx == h_sign_idx]
-                    h_title, h_desc = house_details[house_num - 1]
-
-                    with st.expander(f"📍 {house_num}. {h_title} — राशि: {h_sign_name} ({SIGNS_HI[h_sign_idx]})", expanded=False):
-                        st.write(f"• **भाव का महत्व:** {h_desc}")
-                        st.write(f"• **भाव स्वामी (House Lord):** `{h_lord}`")
-                        st.write(f"• **स्थित ग्रह:** `{', '.join(planets_here) if planets_here else 'खाली भाव (कोई ग्रह नहीं)'}`")
-
-                # 11. VEDIC & LAL KITAB REMEDIES
-                section_heading("11. वैदिक एवं लाल किताब उपाय (Vedic & Lal Kitab Remedies)", "🌿")
-
-                with st.expander("🌿 ग्रह शांति एवं भाग्योदय के मुख्य उपाय", expanded=True):
-                    st.write("""
-                    1. **आत्मबल व आरोग्य हेतु:** नित्य प्रातः सूर्य देव को तांबे के पात्र से जल अर्पित करें एवं 'ओम् नमः शिवाय' का ध्यानपूर्वक जप करें।
-                    2. **कार्यक्षेत्र में उन्नति हेतु:** प्रत्येक शनिवार को हनुमान चालीसा का पाठ करें एवं पीपल के वृक्ष के समीप दीपक प्रज्वलित करें।
-                    3. **भाग्यवृद्धि व सुख-समृद्धि हेतु:** माता-पिता व वयोवृद्धों का सदैव सम्मान करें तथा अपनी क्षमतानुसार अन्न या वस्त्र का दान करें।
-                    """)
-
-                # PDF DOWNLOAD BUTTON
                 st.markdown("---")
                 pdf_bytes = generate_pdf_report(
                     name, dob.strftime("%Y-%m-%d"), location.address,
@@ -617,9 +517,10 @@ if submitted:
                 st.download_button(
                     label="📄 Download Complete Kundli PDF Report",
                     data=bytes(pdf_bytes),
-                    file_name=f"{name}_Jyotish_AI_Detailed_Report.pdf",
+                    file_name=f"{name}_Jyotish_AI_Report.pdf",
                     mime="application/pdf"
                 )
 
         except Exception as e:
             st.error(f"Calculation error: {e}")
+            
