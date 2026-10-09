@@ -451,10 +451,9 @@ if submitted:
                 # 6. DASHA & ANTARDASHA
                 section_heading("6. महादशा एवं अंतर्दशा का अति-विस्तृत फलादेश (Dasha Analysis)", "⏳")
 
-                moon_res = swe.calc_ut(jd, swe.MOON, flags)
                 moon_degree = moon_res[0][0] % 360
                 moon_sign_idx = int(moon_degree // 30)
-                moon_nak_idx = int(moon_degree / nak_span)
+                nak_span = 360.0 / 27.0
 
                 deg_in_nak = moon_degree % nak_span
                 balance_fraction = 1.0 - (deg_in_nak / nak_span)
