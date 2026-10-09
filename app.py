@@ -139,35 +139,3 @@ if submitted:
 
     except Exception as e:
         st.error(f"Calculation error: {e}")
-        
-        # Calculate Vedic Ascendant and houses
-        cusps, ascmc = swe.houses_ex(
-            jd, lat, lon, b'P', swe.FLG_SIDEREAL
-        )
-
-        asc_degree = ascmc[0] % 360
-        asc_sign = int(asc_degree // 30)
-
-        st.subheader("Lagna")
-        st.write("Ascendant Rashi:", SIGNS[asc_sign])
-        st.write(
-            "Lagna Degree:",
-            round(asc_degree % 30, 2)
-        )
-
-        st.subheader("12 Bhav")
-        house_rows = []
-
-        for i, cusp in enumerate(cusps):
-            degree = cusp % 360
-            house_rows.append({
-                "Bhav": i + 1,
-                "Rashi": SIGNS[int(degree // 30)],
-                "Degree": round(degree % 30, 2)
-            })
-
-        st.dataframe(
-            house_rows,
-            use_container_width=True
-        )
-        
