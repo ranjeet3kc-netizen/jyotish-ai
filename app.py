@@ -74,13 +74,14 @@ with st.form("birth_form"):
 
 if submitted:
     try:
-        # Nepal standard time = UTC+5:45
-        local_hours = bt.hour + bt.minute / 60
-        utc_hours = local_hours - 5.75
+                local_dt = datetime.combine(dob, bt)
+        utc_dt = local_dt - timedelta(hours=5, minutes=45)
 
         jd = swe.julday(
-            dob.year, dob.month, dob.day,
-            utc_hours
+            utc_dt.year,
+            utc_dt.month,
+            utc_dt.day,
+            utc_dt.hour + utc_dt.minute / 60
         )
 
         swe.set_sid_mode(swe.SIDM_LAHIRI)
