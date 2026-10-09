@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 from geopy.geocoders import Nominatim
 from timezonefinder import TimezoneFinder
 import zoneinfo
-from fpdf import FPDF
 
 # ---------------------------------------------------------------
 # Swiss Ephemeris (Lahiri Ayanamsha)
@@ -149,6 +148,224 @@ def find_yogas(sign_of, houses):
     return yogas
 
 
+def analyze_love(asc_sign, sign_of, houses, gender):
+    """Love / marriage / affair tendencies from 5th, 7th, 12th houses,
+    their lords, Venus (or Jupiter for women), Mars, Rahu, Ketu, Shani."""
+    lord5 = RASHI_LORDS[(asc_sign + 4) % 12]
+    lord7 = RASHI_LORDS[(asc_sign + 6) % 12]
+    karaka = "Guru" if gender.startswith("Female") else "Shukra"
+
+    def in_house(h):
+        return [p for p in houses if houses[p] == h]
+
+    def together(a, b):
+        return sign_of[a] == sign_of[b]
+
+    love, marriage, affair = [], [], []
+    score = 0
+
+    # --- Prem (5th house)
+    p5 = in_house(5)
+    love.append(("info", f"पंचम भाव (प्रेम): लग्न से {SIGNS[(asc_sign + 4) % 12]} राशि, स्वामी {lord5} "
+                         f"{houses[lord5]}वें भाव में। पंचम में ग्रह: {', '.join(p5) if p5 else 'कोई नहीं'}।"))
+    if houses["Shukra"] in (1, 5, 7, 11):
+        love.append(("good", f"शुक्र {houses['Shukra']}वें भाव में है: प्रेम, आकर्षण और रोमांस की अच्छी क्षमता।"))
+    elif houses["Shukra"] in (6, 8, 12):
+        love.append(("warn", f"शुक्र {houses['Shukra']}वें भाव में है: प्रेम में बाधा, देरी या गुप्तता के संकेत।"))
+    if "Chandra" in p5 or together("Chandra", "Shukra"):
+        love.append(("good", "चंद्र/शुक्र का संबंध भावनात्मक और संवेदनशील प्रेम स्वभाव दर्शाता है।"))
+    if together("Shani", "Shukra"):
+        love.append(("warn", "शनि-शुक्र एक राशि में: प्रेम देर से मिलता है, रिश्ते में गंभीरता और दूरी दोनों रह सकती हैं।"))
+    if together("Mangal", "Shukra"):
+        love.append(("warn", "मंगल-शुक्र एक राशि में: तीव्र आकर्षण और जुनून, पर संयम की आवश्यकता।"))
+        score += 1
+    if together("Rahu", "Shukra") or together("Ketu", "Shukra"):
+        love.append(("warn", "राहु/केतु-शुक्र संबंध: असामान्य या अचानक आकर्षण, भ्रम की संभावना।"))
+        score += 1
+
+    # --- Prem vivah (love marriage)
+    if together(lord5, lord7) and lord5 != lord7:
+        marriage.append(("good", "पंचमेश और सप्तमेश एक राशि में: प्रेम-विवाह का मजबूत योग।"))
+    if houses[lord5] == 7 or houses[lord7] == 5:
+        marriage.append(("good", "पंचमेश-सप्तमेश का भाव-परिवर्तन/संबंध: प्रेम से विवाह की संभावना।"))
+    if lord5 == lord7:
+        marriage.append(("good", f"{lord5} पंचम और सप्तम दोनों का स्वामी है: प्रेम और विवाह एक-दूसरे से जुड़े रहते हैं।"))
+    if houses[karaka] in (5, 7):
+        marriage.append(("good", f"विवाह कारक {karaka} {houses[karaka]}वें भाव में है: साथी से अच्छा जुड़ाव।"))
+    if not marriage:
+        marriage.append(("info", "प्रेम-विवाह के स्पष्ट शास्त्रीय योग नहीं मिले; विवाह पारंपरिक या मिश्रित रूप से संभव।"))
+
+    # --- Saptam (7th house)
+    p7 = in_house(7)
+    marriage.append(("info", f"सप्तम भाव: {SIGNS[(asc_sign + 6) % 12]} राशि, स्वामी {lord7} {houses[lord7]}वें भाव में। "
+                             f"सप्तम में ग्रह: {', '.join(p7) if p7 else 'कोई नहीं'}।"))
+    if houses[lord7] in (6, 8, 12):
+        marriage.append(("warn", f"सप्तमेश {houses[lord7]}वें (दुःस्थान) भाव में: वैवाहिक जीवन में उतार-चढ़ाव, दूरी या विलंब।"))
+        score += 1
+    if houses[lord7] in (1, 4, 5, 7, 9, 10, 11):
+        marriage.append(("good", f"सप्तमेश {houses[lord7]}वें भाव में: वैवाहिक सुख के लिए अनुकूल स्थिति।"))
+    if "Shani" in p7 or "Mangal" in p7:
+        marriage.append(("warn", "सप्तम में शनि/मंगल: विवाह में देरी या स्वभाव-भेद; धैर्य ज़रूरी।"))
+    if "Guru" in p7 or "Shukra" in p7:
+        marriage.append(("good", "सप्तम में गुरु/शुक्र: सुखद और सहयोगी जीवनसाथी का संकेत।"))
+
+    # --- Affair / secret relationship tendencies
+    if "Rahu" in in_house(5) or "Rahu" in p7 or "Ketu" in p7:
+        affair.append(("warn", "राहु/केतु पंचम या सप्तम में: गुप्त, असामान्य या अचानक बनने-टूटने वाले संबंधों की प्रवृत्ति।"))
+        score += 1
+    if "Rahu" in in_house(12) or "Mangal" in in_house(12):
+        affair.append(("warn", "द्वादश भाव (शय्या सुख/गुप्त बातें) में राहु/मंगल: छिपे हुए संबंधों की प्रवृत्ति।"))
+        score += 1
+    if houses[lord5] in (6, 8, 12) or houses[lord7] == 12:
+        affair.append(("warn", "पंचमेश/सप्तमेश का दुःस्थान या द्वादश से संबंध: संबंधों में गोपनीयता या बाधा।"))
+        score += 1
+    if together("Mangal", "Shukra") or together("Rahu", "Shukra"):
+        affair.append(("warn", "शुक्र पर मंगल/राहु का प्रभाव: आकर्षण में अधिक तीव्रता, इच्छाओं पर संयम की आवश्यकता।"))
+        score += 1
+    if houses["Shukra"] == 12:
+        affair.append(("info", "शुक्र द्वादश में: भोग-विलास और निजी जीवन में गोपनीयता की प्रवृत्ति।"))
+    if "Shani" in in_house(7) or "Guru" in in_house(7):
+        affair.append(("good", "सप्तम में शनि/गुरु: मर्यादा और निष्ठा की प्रवृत्ति को बल।"))
+        score -= 1
+    if not affair:
+        affair.append(("good", "गुप्त संबंध या अनैतिक आकर्षण के स्पष्ट योग नहीं मिले।"))
+
+    level = "कम" if score <= 1 else ("मध्यम" if score <= 3 else "अधिक")
+    return {"love": love, "marriage": marriage, "affair": affair,
+            "affair_level": level, "score": score, "karaka": karaka,
+            "lord5": lord5, "lord7": lord7}
+
+
+WEEKDAYS = ["सोमवार", "मंगलवार", "बुधवार", "गुरुवार", "शुक्रवार", "शनिवार", "रविवार"]
+TITHIS = ["प्रतिपदा", "द्वितीया", "तृतीया", "चतुर्थी", "पंचमी", "षष्ठी", "सप्तमी", "अष्टमी",
+          "नवमी", "दशमी", "एकादशी", "द्वादशी", "त्रयोदशी", "चतुर्दशी"]
+PANCHANG_YOGAS = ["विष्कुम्भ", "प्रीति", "आयुष्मान", "सौभाग्य", "शोभन", "अतिगण्ड", "सुकर्मा", "धृति",
+                  "शूल", "गण्ड", "वृद्धि", "ध्रुव", "व्याघात", "हर्षण", "वज्र", "सिद्धि", "व्यतीपात",
+                  "वरीयान", "परिघ", "शिव", "सिद्ध", "साध्य", "शुभ", "शुक्ल", "ब्रह्म", "इन्द्र", "वैधृति"]
+KARANA_MOVABLE = ["बव", "बालव", "कौलव", "तैतिल", "गर", "वणिज", "विष्टि (भद्रा)"]
+KARANA_FIXED = ["शकुनि", "चतुष्पद", "नाग"]
+
+NAK_GANA = ["देव", "मनुष्य", "राक्षस", "मनुष्य", "देव", "मनुष्य", "देव", "देव", "राक्षस", "राक्षस",
+            "मनुष्य", "मनुष्य", "देव", "राक्षस", "देव", "राक्षस", "देव", "राक्षस", "राक्षस", "मनुष्य",
+            "मनुष्य", "देव", "राक्षस", "राक्षस", "मनुष्य", "मनुष्य", "देव"]
+NAK_YONI = ["अश्व", "गज", "मेष", "सर्प", "सर्प", "श्वान", "मार्जार", "मेष", "मार्जार", "मूषक",
+            "मूषक", "गौ", "महिष", "व्याघ्र", "महिष", "व्याघ्र", "मृग", "मृग", "श्वान", "वानर",
+            "नकुल", "वानर", "सिंह", "अश्व", "सिंह", "गौ", "गज"]
+NADI_NAMES = ["आदि", "मध्य", "अंत्य", "अंत्य", "मध्य", "आदि"]       # index % 6
+VARNA_BY_SIGN = ["क्षत्रिय", "वैश्य", "शूद्र", "ब्राह्मण"] * 3          # index % 4
+VASHYA_BY_SIGN = ["चतुष्पद", "चतुष्पद", "मानव", "जलचर", "वनचर", "मानव", "मानव", "कीट",
+                  "मानव/चतुष्पद", "चतुष्पद/जलचर", "मानव", "जलचर"]
+TATVA_BY_SIGN = ["अग्नि", "पृथ्वी", "वायु", "जल"]                      # index % 4
+BHAVA_NAMES = ["तनु (लग्न)", "धन/कुटुंब", "सहज (पराक्रम)", "सुख/माता", "पुत्र/विद्या/प्रेम",
+               "रिपु/रोग/ऋण", "जाया/विवाह", "आयु/गुप्त", "भाग्य/धर्म", "कर्म/व्यवसाय", "लाभ", "व्यय/विदेश"]
+
+CAREER_HOUSE = {
+    1: "स्वयं के बल पर, स्वतंत्र कार्य या नेतृत्व वाली भूमिका।",
+    2: "वाणी, परिवार या धन-संबंधी कारोबार; बैंकिंग/खाद्य क्षेत्र में लाभ।",
+    3: "मेहनत, संचार, मीडिया, सेल्स या छोटी यात्राओं वाले कार्य।",
+    4: "घर के पास या घर से काम; भूमि-भवन, कृषि या वाहन संबंधी क्षेत्र।",
+    5: "शिक्षा, रचनात्मक कार्य, सलाह या निवेश से जुड़े क्षेत्र।",
+    6: "सेवा, स्वास्थ्य, कानून, प्रतियोगिता या नौकरी में सफलता।",
+    7: "साझेदारी, व्यापार और जनसंपर्क वाले कार्य में सफलता।",
+    8: "शोध, बीमा, गुप्त/तकनीकी कार्य; करियर में अचानक बदलाव संभव।",
+    9: "भाग्य का साथ; उच्च शिक्षा, विदेश या धर्म/कानून से जुड़े क्षेत्र।",
+    10: "करियर बहुत मज़बूत; पद, प्रतिष्ठा और स्थिरता।",
+    11: "बड़ा नेटवर्क और कई स्रोतों से आय।",
+    12: "विदेश, अस्पताल/आश्रम या पर्दे के पीछे वाले कार्य; खर्च अधिक।",
+}
+CAREER_KARAKA = {
+    "Surya": "सरकारी/प्रशासनिक कार्य", "Chandra": "जनता, आतिथ्य, यात्रा, तरल पदार्थ",
+    "Mangal": "इंजीनियरिंग, तकनीकी, सुरक्षा, भूमि", "Budh": "व्यापार, IT, लेखा, लेखन",
+    "Guru": "शिक्षण, कानून, वित्त, सलाह", "Shukra": "कला, मीडिया, फैशन, सौंदर्य",
+    "Shani": "उद्योग, निर्माण, खेती, सेवा", "Rahu": "विदेशी/आधुनिक तकनीक, राजनीति",
+    "Ketu": "शोध, अध्यात्म, गुप्त विद्या",
+}
+
+
+def compute_panchang(lons, dob):
+    sun, moon = lons["Surya"], lons["Chandra"]
+    elong = (moon - sun) % 360
+    tithi_no = int(elong // 12) + 1                       # 1..30
+    paksha = "शुक्ल" if tithi_no <= 15 else "कृष्ण"
+    if tithi_no == 15:
+        tithi = "पूर्णिमा"
+    elif tithi_no == 30:
+        tithi = "अमावस्या"
+    else:
+        tithi = TITHIS[(tithi_no - 1) % 15]
+    k = int(elong // 6)                                    # 0..59
+    if k == 0:
+        karana = "किंस्तुघ्न"
+    elif k >= 57:
+        karana = KARANA_FIXED[k - 57]
+    else:
+        karana = KARANA_MOVABLE[(k - 1) % 7]
+    span = 360.0 / 27.0
+    yoga = PANCHANG_YOGAS[int(((sun + moon) % 360) / span)]
+    nak = int(moon / span)
+    pada = int((moon % span) / (span / 4)) + 1
+    return {"vara": WEEKDAYS[dob.weekday()], "tithi": f"{paksha} पक्ष {tithi}", "karana": karana,
+            "yoga": yoga, "nakshatra": NAKSHATRAS[nak], "pada": pada}
+
+
+def compute_avakahada(moon_lon):
+    nak = int(moon_lon / (360.0 / 27.0))
+    sign = int(moon_lon // 30)
+    return {"वर्ण": VARNA_BY_SIGN[sign], "वश्य": VASHYA_BY_SIGN[sign], "योनि": NAK_YONI[nak],
+            "गण": NAK_GANA[nak], "नाड़ी": NADI_NAMES[nak % 6], "तत्व": TATVA_BY_SIGN[sign % 4],
+            "राशि स्वामी": RASHI_LORDS[sign]}
+
+
+def compute_sade_sati(moon_sign):
+    now = datetime.now(timezone.utc)
+    jd = swe.julday(now.year, now.month, now.day, now.hour + now.minute / 60.0)
+    sat = swe.calc_ut(jd, swe.SATURN, swe.FLG_SWIEPH | swe.FLG_SIDEREAL)[0][0] % 360
+    s = int(sat // 30)
+    d = (s - moon_sign) % 12
+    status = {11: "साढ़ेसाती - प्रथम चरण (चंद्र से 12वें में शनि)",
+              0: "साढ़ेसाती - द्वितीय चरण (चंद्र राशि में शनि, शिखर)",
+              1: "साढ़ेसाती - तृतीय चरण (चंद्र से 2रे में शनि)",
+              3: "शनि ढैया (चंद्र से 4थे में शनि)",
+              7: "शनि ढैया (चंद्र से 8वें में शनि)"}.get(d)
+    return {"saturn_sign": SIGNS[s], "status": status}
+
+
+def bhava_table(asc_sign, sign_of, houses):
+    rows = []
+    for h in range(1, 13):
+        sign = (asc_sign + h - 1) % 12
+        lord = RASHI_LORDS[sign]
+        rows.append({
+            "भाव": f"{h} - {BHAVA_NAMES[h - 1]}", "राशि": f"{SIGNS[sign]} ({SIGNS_HI[sign]})",
+            "भावेश": f"{lord} ({houses[lord]}वें भाव में)",
+            "ग्रह": ", ".join(p for p in houses if houses[p] == h) or "-",
+        })
+    return rows
+
+
+def analyze_career(asc_sign, sign_of, houses):
+    out = []
+    lord10 = RASHI_LORDS[(asc_sign + 9) % 12]
+    out.append(("info", f"दशमेश {lord10} {houses[lord10]}वें भाव में: {CAREER_HOUSE[houses[lord10]]}"))
+    p10 = [p for p in houses if houses[p] == 10]
+    for p in p10:
+        out.append(("info", f"दशम भाव में {p}: {CAREER_KARAKA[p]} से जुड़े क्षेत्र।"))
+    # wealth
+    lord2, lord11 = RASHI_LORDS[(asc_sign + 1) % 12], RASHI_LORDS[(asc_sign + 10) % 12]
+    good = (1, 2, 5, 9, 10, 11)
+    if houses[lord2] in good:
+        out.append(("good", f"धनेश {lord2} {houses[lord2]}वें भाव में: धन संचय के लिए अनुकूल।"))
+    else:
+        out.append(("warn", f"धनेश {lord2} {houses[lord2]}वें भाव में: खर्च या धन में उतार-चढ़ाव; बचत पर ध्यान दें।"))
+    if houses[lord11] in good:
+        out.append(("good", f"लाभेश {lord11} {houses[lord11]}वें भाव में: आय के अच्छे स्रोत।"))
+    else:
+        out.append(("warn", f"लाभेश {lord11} {houses[lord11]}वें भाव में: आय में अस्थिरता संभव।"))
+    if lord2 != lord11 and sign_of[lord2] == sign_of[lord11]:
+        out.append(("good", "धनेश और लाभेश एक राशि में: धन योग।"))
+    return out
+
+
 def section_heading(title, icon="✨"):
     st.markdown(
         f"""
@@ -194,67 +411,6 @@ def render_north_indian_chart(asc_sign, planet_signs, title):
     ax.axis("off")
     ax.set_title(title, fontsize=13, pad=12, color="maroon", weight="bold")
     return fig
-
-
-def generate_pdf_report(r):
-    """English-only PDF (core fonts have no Devanagari)."""
-    def clean(txt):
-        return str(txt or "").encode("ascii", "ignore").decode("ascii")
-
-    pdf = FPDF(orientation="P", unit="mm", format="A4")
-    pdf.set_margins(15, 15, 15)
-    pdf.add_page()
-
-    def heading(t):
-        pdf.set_font("Helvetica", "B", 11)
-        pdf.cell(180, 8, t, new_x="LMARGIN", new_y="NEXT")
-        pdf.set_font("Helvetica", "", 10)
-
-    def line(t):
-        pdf.multi_cell(180, 6, clean(t), new_x="LMARGIN", new_y="NEXT")
-
-    pdf.set_font("Helvetica", "B", 14)
-    pdf.cell(180, 10, "JYOTISH AI - DETAILED HOROSCOPE REPORT",
-             new_x="LMARGIN", new_y="NEXT", align="C")
-    pdf.ln(4)
-
-    heading("Personal & Birth Details")
-    line(f"Name: {r['name'] if clean(r['name']).strip() else '(see app)'}")
-    line(f"Date of Birth: {r['dob_str']}")
-    line(f"Place of Birth: {r['place']}")
-    line(f"Lagna (Ascendant): {SIGNS[r['asc_sign']]}")
-    line(f"Moon Rashi: {SIGNS[r['moon_sign']]}")
-    line(f"Current Dasha: {r['active_md']} Mahadasha - {r['active_ad']} Antardasha")
-    pdf.ln(3)
-
-    heading("Planetary Positions")
-    for row in r["rows"]:
-        line(f"{row['Planet']}: {row['D1 Rashi']} | House {row['House'].split()[-1]} | "
-             f"{row['Degree']} deg | {row['Nakshatra']} | D9: {row['D9 Navamsha Rashi']}")
-    pdf.ln(3)
-
-    heading("Doshas")
-    line(f"Manglik Dosha: {'Yes' if r['is_manglik'] else 'No'} (Mars in house {r['houses']['Mangal']})")
-    line(f"Kaal Sarp Dosha: {'Yes' if r['kalsarp'] else 'No'}")
-    pdf.ln(3)
-
-    heading("Mahadasha Timeline")
-    for m in r["md_rows"]:
-        line(f"{m['lord']}: {m['start']} to {m['end']}")
-    pdf.ln(3)
-
-    heading("Key Yogas")
-    if r["yogas"]:
-        for name, _ in r["yogas"]:
-            line(f"- {name}")
-    else:
-        line("- No major classical yoga detected.")
-
-    pdf.ln(4)
-    pdf.set_font("Helvetica", "I", 9)
-    pdf.cell(180, 6, "Generated by Jyotish AI Engine. For guidance only.",
-             new_x="LMARGIN", new_y="NEXT", align="C")
-    return bytes(pdf.output())
 
 
 # ---------------------------------------------------------------
@@ -377,6 +533,12 @@ def compute_report(name, dob, bt, place):
         "ad_rows": active_ad_rows,
         "yogas": find_yogas(sign_of, houses),
         "lagna_lord": RASHI_LORDS[asc_sign],
+        "sign_of": sign_of,
+        "panchang": compute_panchang(lons, dob),
+        "avakahada": compute_avakahada(lons["Chandra"]),
+        "sadesati": compute_sade_sati(sign_of["Chandra"]),
+        "bhava": bhava_table(asc_sign, sign_of, houses),
+        "career": analyze_career(asc_sign, sign_of, houses),
     }
 
 
@@ -426,7 +588,8 @@ if st.button("🚀 Generate Full Detailed Report / संपूर्ण वि�
                 st.error("जन्म स्थान नहीं मिल सका! कृपया स्थान और देश का नाम सही से लिखें।")
             else:
                 rep["time_label"] = f"{hour12}:{int(minute):02d} {ampm[:2]}"
-                st.session_state["report"] = rep   # survives reruns (download button)
+                rep["gender"] = gender
+                st.session_state["report"] = rep   # survives reruns
         except Exception as e:
             st.error(f"गणना में त्रुटि: {e}")
 
@@ -438,10 +601,40 @@ if r:
     st.success(f"📍 स्थान: **{r['address']}** | टाइमज़ोन: **{r['tz_str']} (UTC {r['utc_off']:+.2f})** "
                f"| समय: **{r['time_label']}**")
 
-    section_heading("1. ग्रह स्थिति एवं नवमांश विवरण (Planetary Positions)", "🪐")
+    section_heading("1. मूल विवरण, पंचांग एवं अवकहड़ा (Basic Details)", "📜")
+    pc, av = r["panchang"], r["avakahada"]
+    b1, b2, b3 = st.columns(3)
+    with b1:
+        st.markdown("**जन्म विवरण**")
+        st.dataframe([
+            {"विवरण": "नाम", "मान": r["name"]},
+            {"विवरण": "जन्म तिथि/समय", "मान": r["dob_str"]},
+            {"विवरण": "जन्म स्थान", "मान": r["place"]},
+            {"विवरण": "लग्न", "मान": f"{SIGNS[r['asc_sign']]} ({SIGNS_HI[r['asc_sign']]})"},
+            {"विवरण": "चंद्र राशि", "मान": f"{SIGNS[r['moon_sign']]} ({SIGNS_HI[r['moon_sign']]})"},
+            {"विवरण": "सूर्य राशि", "मान": f"{SIGNS[r['sign_of']['Surya']]} ({SIGNS_HI[r['sign_of']['Surya']]})"},
+            {"विवरण": "लग्नेश", "मान": r["lagna_lord"]},
+            {"विवरण": "अयनांश", "मान": "लाहिरी (चित्रपक्ष)"},
+        ], hide_index=True, use_container_width=True)
+    with b2:
+        st.markdown("**पंचांग (जन्म के समय)**")
+        st.dataframe([
+            {"विवरण": "वार", "मान": pc["vara"]},
+            {"विवरण": "तिथि", "मान": pc["tithi"]},
+            {"विवरण": "नक्षत्र", "मान": f"{pc['nakshatra']} (चरण {pc['pada']})"},
+            {"विवरण": "योग", "मान": pc["yoga"]},
+            {"विवरण": "करण", "मान": pc["karana"]},
+        ], hide_index=True, use_container_width=True)
+        st.caption("वार स्थानीय तारीख़ से है; सूर्योदय से पहले के जन्म में पिछला वार माना जाता है।")
+    with b3:
+        st.markdown("**अवकहड़ा चक्र**")
+        st.dataframe([{"विवरण": k, "मान": v} for k, v in av.items()],
+                     hide_index=True, use_container_width=True)
+
+    section_heading("2. ग्रह स्थिति एवं नवमांश विवरण (Planetary Positions)", "🪐")
     st.dataframe(r["rows"], use_container_width=True)
 
-    section_heading("2. D1 (जन्म) एवं D9 (नवमांश) चक्र", "📊")
+    section_heading("3. लग्न, चंद्र एवं नवमांश कुंडली", "📊")
     c1, c2 = st.columns(2)
     with c1:
         st.write(f"**D1 लग्न:** {SIGNS[r['asc_sign']]} ({SIGNS_HI[r['asc_sign']]}) — {round(r['asc_degree'] % 30, 2)}°")
@@ -454,13 +647,23 @@ if r:
         st.pyplot(fig)
         plt.close(fig)
 
-    section_heading("3. दोष विचार (Manglik & Kaal Sarp Dosha)", "⚠️")
+    mc1, mc2 = st.columns(2)
+    with mc1:
+        st.write(f"**चंद्र कुंडली (चंद्र लग्न):** {SIGNS[r['moon_sign']]} ({SIGNS_HI[r['moon_sign']]})")
+        fig = render_north_indian_chart(r["moon_sign"], r["d1_signs"], "चंद्र कुंडली")
+        st.pyplot(fig)
+        plt.close(fig)
+    with mc2:
+        section_heading("4. भाव विवरण (Bhava Table)", "🏠")
+        st.dataframe(r["bhava"], hide_index=True, use_container_width=True)
+
+    section_heading("5. दोष विचार (Manglik, Kaal Sarp, Sade Sati)", "⚠️")
     d1, d2 = st.columns(2)
     with d1:
         with st.expander("🔥 मांगलिक दोष", expanded=True):
             mh = r["houses"]["Mangal"]
             if r["is_manglik"]:
-                st.error(f"मंगल **{mh}वें भाव** में है, इसलिए **मागलिक दोष** बनता है। विवाह से पूर्व कुंडली मिलान आवश्यक है।")
+                st.error(f"मंगल **{mh}वें भाव** में है, इसलिए **मांगलिक दोष** बनता है। विवाह से पूर्व कुंडली मिलान आवश्यक है।")
             else:
                 st.success(f"मंगल **{mh}वें भाव** में है। मांगलिक दोष नहीं पाया गया।")
     with d2:
@@ -470,7 +673,14 @@ if r:
             else:
                 st.success("कालसर्प दोष नहीं पाया गया।")
 
-    section_heading("4. महादशा एवं अंतर्दशा (Dasha Analysis)", "⏳")
+    ss = r["sadesati"]
+    with st.expander(f"🪐 साढ़ेसाती / ढैया (वर्तमान शनि: {ss['saturn_sign']} राशि में)", expanded=True):
+        if ss["status"]:
+            st.error(f"वर्तमान में **{ss['status']}** चल रही है। धैर्य, अनुशासन और शनिवार को सेवा/दान लाभकारी माना जाता है।")
+        else:
+            st.success("वर्तमान में साढ़ेसाती या शनि ढैया नहीं है।")
+
+    section_heading("6. महादशा एवं अंतर्दशा (Dasha Analysis)", "⏳")
     st.markdown(f"**वर्तमान दशा:** {r['active_md']} महादशा — {r['active_ad']} अंतर्दशा")
     st.dataframe(
         [{"महादशा": m["lord"], "प्रारंभ": m["start"], "समाप्ति": m["end"],
@@ -483,14 +693,14 @@ if r:
         st.write(f"**{r['active_md']} महादशा की अंतर्दशाएँ:**")
         st.dataframe(r["ad_rows"], use_container_width=True)
 
-    section_heading("5. प्रमुख योग (Yogas)", "🌟")
+    section_heading("7. प्रमुख योग (Yogas)", "🌟")
     if r["yogas"]:
         for yname, ydesc in r["yogas"]:
             st.success(f"**{yname}** — {ydesc}")
     else:
         st.info("कोई प्रमुख शास्त्रीय योग नहीं मिला।")
 
-    section_heading("6. रत्न, रुद्राक्ष एवं स्वास्थ्य (Remedies & Health)", "💎")
+    section_heading("8. रत्न, रुद्राक्ष एवं स्वास्थ्य (Remedies & Health)", "💎")
     ll, md = r["lagna_lord"], r["active_md"]
     st.markdown(f"**लग्नेश:** {ll}")
     g1, g2 = st.columns(2)
@@ -505,11 +715,31 @@ if r:
             st.write(f"🩺 **स्वास्थ्य ({md}):** {HEALTH_MAP[md]}")
     st.caption("रत्न धारण से पहले किसी योग्य ज्योतिषी से परामर्श अवश्य लें।")
 
-    section_heading("7. PDF रिपोर्ट डाउनलोड", "📄")
-    st.download_button(
-        "📥 Download PDF Report",
-        data=generate_pdf_report(r),
-        file_name=f"jyotish_report_{date.today().isoformat()}.pdf",
-        mime="application/pdf",
-    )
-    st.caption("PDF में केवल अंग्रेज़ी/रोमन अक्षर आते हैं। Hindi के लिए Unicode font + text-shaping चाहिए।")
+    section_heading("9. प्रेम, विवाह एवं संबंध (Love, Relationship & Affair)", "❤️")
+    love = analyze_love(r["asc_sign"], r["sign_of"], r["houses"], r.get("gender", "Male"))
+
+    def show(items):
+        for kind, txt in items:
+            if kind == "good":
+                st.success(txt)
+            elif kind == "warn":
+                st.warning(txt)
+            else:
+                st.info(txt)
+
+    st.markdown(f"**पंचमेश:** {love['lord5']} | **सप्तमेश:** {love['lord7']} | **विवाह कारक:** {love['karaka']}")
+    with st.expander("💕 प्रेम स्वभाव (Love Nature)", expanded=True):
+        show(love["love"])
+    with st.expander("💍 प्रेम-विवाह एवं वैवाहिक जीवन (Marriage)", expanded=True):
+        show(love["marriage"])
+    with st.expander("🕵️ गुप्त संबंध / अफेयर की प्रवृत्ति (Affair Tendency)", expanded=True):
+        show(love["affair"])
+        st.markdown(f"**कुल प्रवृत्ति स्तर: {love['affair_level']}**")
+    st.caption("यह केवल कुंडली के ग्रह-योगों पर आधारित सामान्य संकेत है, निश्चित भविष्यवाणी नहीं। "
+               "असल जीवन में व्यक्ति के कर्म, संस्कार और निर्णय सबसे ज़्यादा मायने रखते हैं।")
+
+    section_heading("10. करियर एवं धन (Career & Wealth)", "💼")
+    for kind, txt in r["career"]:
+        (st.success if kind == "good" else st.warning if kind == "warn" else st.info)(txt)
+    st.caption("सभी फल कुंडली के सामान्य ग्रह-योगों पर आधारित हैं; निर्णय सोच-समझकर और योग्य सलाह से लें।")
+                 
