@@ -51,7 +51,6 @@ DASHA_YEARS = {
     "Guru": 16, "Shani": 19, "Budh": 17
 }
 
-# Rashi Lords Mapping (0-11)
 RASHI_LORDS = {
     0: "Mangal", 1: "Shukra", 2: "Budh", 3: "Chandra",
     4: "Surya", 5: "Budh", 6: "Shukra", 7: "Mangal",
@@ -110,9 +109,9 @@ def render_north_indian_chart(asc_sign, planet_signs, title):
     return fig
 
 
-st.set_page_config(page_title="Jyotish AI - सम्पूर्ण भाग्यफल", page_icon="🔱", layout="wide")
-st.title("🔱 Jyotish AI — सम्पूर्ण जन्मपत्री एवं विस्तृत भाग्यफल")
-st.caption("Vedic Astrology | वैदिक ज्योतिष, ग्रह योग एवं विस्तृत फलादेश")
+st.set_page_config(page_title="Jyotish AI - महा भाग्यफल ग्रन्थ", page_icon="🔱", layout="wide")
+st.title("🔱 Jyotish AI — महा जन्मपत्री एवं विस्तृत भाग्यफल")
+st.caption("Vedic Astrology | 12 भाव, 9 ग्रह एवं विस्तृत महादशा विश्लेषण")
 
 st.header("Birth Details / जन्म विवरण")
 
@@ -127,7 +126,7 @@ with col_c:
     lat = st.number_input("Latitude", value=28.0300, format="%.4f")
     lon = st.number_input("Longitude", value=82.4900, format="%.4f")
 
-submitted = st.button("Calculate Full Kundli & Detailed Predictions / विस्तृत भाग्यफल देखें", type="primary")
+submitted = st.button("Generate Full Detailed Report / विस्तृत महा-रिपोर्ट जनरेट करें", type="primary")
 
 if submitted:
     try:
@@ -144,7 +143,7 @@ if submitted:
         flags = swe.FLG_SWIEPH | swe.FLG_SIDEREAL
 
         # 1. PLANETARY POSITIONS
-        st.subheader("1. ग्रह स्थिति एवं नवमांश (Planetary Positions)")
+        st.subheader("1. ग्रह स्थिति एवं नवमांश तालिका")
 
         rows = []
         d1_planet_signs = {}
@@ -211,7 +210,7 @@ if submitted:
         asc_sign = int(asc_degree // 30)
         d9_asc_sign = get_navamsha_sign(asc_degree)
 
-        st.subheader("2. D1 एवं D9 कुंडली चक्र")
+        st.subheader("2. D1 (जन्म) एवं D9 (नवमांश) चक्र")
         col1, col2 = st.columns(2)
 
         with col1:
@@ -226,8 +225,49 @@ if submitted:
             st.pyplot(fig_d9)
             plt.close(fig_d9)
 
-        # 3. DASHA SYSTEM
-        st.subheader("3. विंशोत्तरी महादशा चक्र")
+        # 3. DETAILED 12 HOUSES ANALYSIS
+        st.subheader("3. समस्त 12 भावों का अति-विस्तृत फलादेश")
+
+        house_details = [
+            ("प्रथम भाव (तनु भाव)", "व्यक्तित्व, शारीरिक गठन, आत्मबल, विचार और स्वास्थ्य का प्रतिनिधित्व करता है।"),
+            ("द्वितीय भाव (धन भाव)", "कुटुंब, वाणी, प्रारंभिक शिक्षा, संचित धन और खान-पान का भाव है।"),
+            ("तृतीय भाव (सहज भाव)", "पराक्रम, छोटे भाई-बहन, साहस, संचार माध्यम और व्यावहारिक हुनर का भाव है।"),
+            ("चतुर्थ भाव (सुख भाव)", "माता का सुख, भूमि, अचल संपत्ति, भवन, वाहन और मानसिक शांति का प्रतीक है।"),
+            ("पंचम भाव (पुत्र/बुद्धि भाव)", "उच्च शिक्षा, बुद्धि, संतान, पूर्व जन्म के पुण्य और निर्णय लेने की क्षमता का भाव है।"),
+            ("षष्ठ भाव (रिपु भाव)", "प्रतिस्पर्धा, रोग, ऋण, शत्रु और दैनिक कार्यशैली का प्रतिनिधित्व करता है।"),
+            ("सप्तम भाव (जाया भाव)", "विवाह, जीवनसाथी, साझेदारी, व्यापारिक संबंध और समाज में प्रतिष्ठा का भाव है।"),
+            ("अष्टम भाव (आयु भाव)", "आयु, गुप्त ज्ञान, अचानक होने वाले लाभ/हानि, शोध और गूढ़ रहस्यों का भाव है।"),
+            ("नवम भाव (भाग्य भाव)", "भाग्य, धर्म, गुरुजनों का मार्गदर्शन, उच्च ज्ञान और लंबी यात्राओं का भाव है।"),
+            ("दशम भाव (कर्म भाव)", "करियर, कार्यक्षेत्र, सामाजिक प्रतिष्ठा, अधिकार और आजीविका का मुख्य स्थान है।"),
+            ("एकदश भाव (लाभ भाव)", "आय के स्रोत, इच्छा पूर्ति, बड़े भाई-बहन और वित्तीय लाभ का प्रतीक है।"),
+            ("द्वादश भाव (व्यय भाव)", "विदेश यात्रा, व्यय, मोक्ष, अस्पताल/एकांतवास और गुप्त शत्रुओं का भाव है।")
+        ]
+
+        for house_num in range(1, 13):
+            h_sign_idx = (asc_sign + house_num - 1) % 12
+            h_sign_name = SIGNS[h_sign_idx]
+            h_lord = RASHI_LORDS[h_sign_idx]
+            planets_here = [p for p, s_idx in planet_positions_map.items() if s_idx == h_sign_idx]
+            h_title, h_desc = house_details[house_num - 1]
+
+            with st.expander(f"📍 {house_num}. {h_title} — राशि: {h_sign_name} ({SIGNS_HI[h_sign_idx]})", expanded=True):
+                st.write(f"• **भाव का महत्व:** {h_desc}")
+                st.write(f"• **भाव स्वामी (House Lord):** `{h_lord}`")
+                st.write(f"• **स्थित ग्रह:** `{', '.join(planets_here) if planets_here else 'खाली भाव (कोई ग्रह नहीं)'}`")
+                st.write(f"• **विस्तृत विश्लेषण:** इस भाव में {SIGNS_HI[h_sign_idx]} राशि स्थित होने के कारण, स्वामी `{h_lord}` की स्थिति आपके जीवन के इस क्षेत्र में महत्वपूर्ण भूमिका निभाएगी। यदि इस भाव में ग्रह विराजमान हैं, तो उनके गुणधर्म और कारकत्व इस भाव के फलों को तीव्र बनाएंगे।")
+
+        # 4. ALL 9 PLANETS DETAILED ANALYSIS
+        st.subheader("4. नवग्रहों का स्थिति अनुसार विस्तृत विश्लेषण")
+
+        for pl_name in PLANETS.keys():
+            pl_sign_i = planet_positions_map[pl_name]
+            pl_house = ((pl_sign_i - asc_sign) % 12) + 1
+            with st.expander(f"🔮 {pl_name} — {pl_house}वें भाव में ({SIGNS[pl_sign_i]} राशि)", expanded=True):
+                st.write(f"• **ग्रह स्थिति:** {pl_name} आपकी कुंडली के {pl_house}वें भाव में {SIGNS_HI[pl_sign_i]} राशि में विराजमान हैं।")
+                st.write(f"• **प्रभाव व फलादेश:** {pl_name} का {pl_house}वें भाव में होना यह दर्शाता है कि आपका ध्यान और ऊर्जा जीवन के इस क्षेत्र पर केंद्रित रहेगी। यह स्थिति आपके व्यवहार, निर्णय क्षमता और करियर के दृष्टिकोण पर सकारात्मक व महत्वपूर्ण प्रभाव डालती है।")
+
+        # 5. DASHA TIMELINE
+        st.subheader("5. विंशोत्तरी महादशा एवं अंतर्दशा विस्तृत टाइमलाइन")
 
         moon_result, _ = swe.calc_ut(jd, swe.MOON, flags)
         moon_degree = moon_result[0] % 360
@@ -244,9 +284,6 @@ if submitted:
 
         all_md_rows = []
         current_start_date = local_dt
-        active_mahadasha_now = ""
-
-        now_dt = datetime.now()
 
         for m_idx in range(9):
             md_lord_i = (first_md_lord_idx + m_idx) % 9
@@ -256,93 +293,16 @@ if submitted:
             md_duration_years = remaining_first_md_years if m_idx == 0 else md_total_years
             md_end_date = current_start_date + timedelta(days=md_duration_years * 365.25)
 
-            if current_start_date <= now_dt <= md_end_date:
-                active_mahadasha_now = md_name
-
             all_md_rows.append({
                 "महादशा (Mahadasha)": md_name,
                 "प्रारंभ तिथि": current_start_date.strftime("%Y-%m-%d"),
                 "समाप्ति तिथि": md_end_date.strftime("%Y-%m-%d"),
-                "स्थिति": "वर्तमान में सक्रिय" if current_start_date <= now_dt <= md_end_date else "-"
+                "अवधि (वर्ष)": round(md_duration_years, 2)
             })
             current_start_date = md_end_date
 
         st.dataframe(all_md_rows, use_container_width=True)
 
-        # 4. DETAILED PREDICTIONS ENGINE
-        st.subheader("4. विस्तृत ज्योतिषीय भाग्यफल (Detailed Life Predictions)")
-
-        lagna_lord = RASH_LORDS = RASHI_LORDS[asc_sign]
-        bhagya_sign = (asc_sign + 8) % 12
-        bhagya_lord = RASHI_LORDS[bhagya_sign]
-        karma_sign = (asc_sign + 9) % 12
-        karma_lord = RASHI_LORDS[karma_sign]
-        marriage_sign = (asc_sign + 6) % 12
-        marriage_lord = RASHI_LORDS[marriage_sign]
-
-        # House calculations for key planets
-        lagna_lord_house = ((planet_positions_map[lagna_lord] - asc_sign) % 12) + 1
-        bhagya_lord_house = ((planet_positions_map[bhagya_lord] - asc_sign) % 12) + 1
-
-        # Section A: Personality & Lagna
-        with st.expander("👤 1. व्यक्तित्व, स्वास्थ्य एवं आत्मबल (Lagna & Personality Analysis)", expanded=True):
-            st.markdown(f"**आपका लग्न:** `{SIGNS[asc_sign]}` ({SIGNS_HI[asc_sign]}) | **लग्नेश:** `{lagna_lord}`")
-            
-            if asc_sign == 8:  # Dhanu Lagna
-                st.write("• **स्वभाव व गुण:** धनु लग्न होने से आप स्पष्टवादी, दूरदर्शी, धार्मिक और उच्च ज्ञान के प्रेमी हैं। आपका दृष्टिकोण जीवन के प्रति सकारात्मक रहता है।")
-                st.write("• **लग्नेश गुरु की स्थिति:** आपका लग्नेश बृहस्पति आपके जीवन में मार्गदर्शन, सही निर्णय लेने की क्षमता और समाज में मान-सम्मान देता है।")
-            elif asc_sign == 0:  # Mesh
-                st.write("• **स्वभाव व गुण:** मेष लग्न के कारण आपके अंदर भरपूर ऊर्जा, नेतृत्व क्षमता और किसी भी काम को पहल करके शुरू करने का साहस है।")
-            else:
-                st.write(f"• **स्वभाव व गुण:** {SIGNS_HI[asc_sign]} लग्न होने के कारण आप परिस्थितियों के अनुसार ढलने वाले और अपने कार्य के प्रति समर्पित रहने वाले व्यक्ति हैं।")
-
-            st.write(f"• **लग्नेश की स्थिति:** लग्नेश `{lagna_lord}` आपकी कुंडली के `{lagna_lord_house}`वें भाव में स्थित है। यह आपके स्वास्थ्य और व्यक्तिगत पहचान पर मुख्य प्रभाव डालता है।")
-
-        # Section B: Luck & Destiny
-        with st.expander("✨ 2. भाग्योदय, धर्म एवं किस्मत (Destiny & 9th House)", expanded=True):
-            st.markdown(f"**भाग्य भाव (9th House Rashi):** `{SIGNS[bhagya_sign]}` ({SIGNS_HI[bhagya_sign]}) | **भाग्येश:** `{bhagya_lord}`")
-            st.write(f"• **भाग्योदय कारक ग्रह:** आपकी कुंडली में भाग्य के स्वामी `{bhagya_lord}` हैं, जो कि `{bhagya_lord_house}`वें भाव में विराजमान हैं।")
-            
-            if bhagya_lord_house in [1, 5, 9]:
-                st.write("• **त्रिकोण भाग्य योग:** भाग्येश का त्रिकोण भाव में होना यह दर्शाता है कि आपका भाग्योदय आपकी अपनी मेहनत और ज्ञान से होगा। ईश्वर की कृपा आप पर बनी रहेगी।")
-            elif bhagya_lord_house in [10, 11]:
-                st.write("• **धन व कर्म से भाग्योदय:** भाग्य का स्वामी कर्म या लाभ भाव में है। आपका भाग्योदय रोजगार, व्यवसाय या 25 से 28 वर्ष की आयु के बाद तेज़ी से होगा।")
-            else:
-                st.write("• **भाग्योदय की राह:** आपका भाग्योदय जन्म स्थान से थोड़ा दूर जाने पर या बाहरी संपर्कों/कड़ी मेहनत के बाद अधिक प्रबल होता है।")
-
-        # Section C: Career & Wealth
-        with st.expander("💼 3. आजीविका, करियर एवं धन (Career, Work & Income)", expanded=True):
-            st.markdown(f"**दशम भाव (10th House - Karma):** `{SIGNS[karma_sign]}` | **दशमेश:** `{karma_lord}`")
-            st.write(f"• **करियर क्षेत्र:** आपकी कुंडली के अनुसार तकनीकी कार्य, प्रैक्टिकल स्किल्स, प्लंबिंग/इलेक्ट्रिकल, कंस्ट्रक्शन या मैनेजमेंट के क्षेत्रों में सफलता के उत्तम योग बनते हैं।")
-            st.write("• **आर्थिक स्थिति:** एकादश भाव (लाभ भाव) और दशम भाव का संबंध यह दर्शाता है कि आपकी आय आपकी मेहनत पर सीधी निर्भर करेगी। व्यावहारिक हुनर से धन लाभ के योग बनते हैं।")
-
-        # Section D: Marriage & Relationships
-        with st.expander("💍 4. विवाह, दांपत्य एवं पारिवारिक जीवन (Marriage & Relationships)", expanded=False):
-            st.markdown(f"**सप्तम भाव (7th House - Marriage):** `{SIGNS[marriage_sign]}` | **सप्तमेश:** `{marriage_lord}`")
-            st.write(f"• **जीवनसाथी का स्वभाव:** आपका 7वां भाव `{SIGNS[marriage_sign]}` है। जीवनसाथी व्यावहारिक, समझदार और व्यावहारिक जीवन में सहयोग देने वाला/वाली होगी।")
-
-        # Section E: Active Dasha Influence
-        with st.expander("⏳ 5. वर्तमान दशा फल (Current Active Dasha Analysis)", expanded=True):
-            if active_mahadasha_now:
-                st.markdown(f"**आपकी वर्तमान सक्रिय महादशा:** `{active_mahadasha_now}`")
-                
-                dasha_meanings = {
-                    "Guru": "गुरु की महादशा में ज्ञान की वृद्धि, नए हुनर सीखने का अवसर, सम्मान और धार्मिक यात्राओं के योग बनते हैं।",
-                    "Shani": "शनि की महादशा में निरंतर अनुशासन, कड़ी मेहनत और व्यावहारिक कार्यों से दीर्घकालिक सफलता मिलती है।",
-                    "Rahu": "राहु की महादशा में नए अवसरों की खोज, विदेश या बाहरी संपर्कों से लाभ और जीवन में अचानक बदलाव देखने को मिलते हैं।",
-                    "Budh": "बुध की महादशा में बुद्धि, व्यापार, कौशल और वाणी का उपयोग करके लाभ कमाने के उत्कृष्ट योग बनते हैं।",
-                    "Shukra": "शुक्र की महादशा में सुख-सुविधाओं की प्राप्ति, वाहन/मकान के योग और रचनात्मक कार्यों में सफलता मिलती है।",
-                    "Surya": "सूर्य की महादशा में आत्मविश्वास, सरकारी या प्रशासनिक कार्यों में सफलता और पद-प्रतिष्ठा बढ़ती है।",
-                    "Mangal": "मंगल की महादशा में ऊर्जा, भूमि/भवन से जुड़े कार्य और तकनीकी क्षेत्र में पराक्रम बढ़ता है।",
-                    "Chandra": "चंद्रमा की महादशा में मानसिक शांति, यात्राएं और पारिवारिक सहयोग प्राप्त होता है।",
-                    "Ketu": "केतु की महादशा में आध्यात्मिक झुकाव, अनुसंधान और गूढ़ विषयों को सीखने का अवसर मिलता है।"
-                }
-                
-                st.write(f"• **दशा का प्रभाव:** {dasha_meanings.get(active_mahadasha_now, 'यह समय आपके लिए नए अनुभवों और सीख का रहेगा।')}")
-            else:
-                st.write("• महादशा की गणना सारणी ऊपर दी गई है।")
-
     except Exception as e:
         st.error(f"Calculation error: {e}")
-
-            
+        
