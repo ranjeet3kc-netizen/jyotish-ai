@@ -1,6 +1,7 @@
 import streamlit as st
 import swisseph as swe
 from datetime import datetime, timedelta, date, time
+import os
 SIGNS = [
     "Mesh", "Vrishabh", "Mithun", "Kark",
     "Singh", "Kanya", "Tula", "Vrishchik",
