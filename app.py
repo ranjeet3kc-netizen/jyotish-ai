@@ -3,6 +3,8 @@ import swisseph as swe
 from datetime import datetime, timedelta, date, time
 import matplotlib.pyplot as plt
 from geopy.geocoders import Nominatim
+from timezonefinder import TimezoneFinder
+import zoneinfo
 
 # Initialize Swiss Ephemeris Settings
 swe.set_sid_mode(swe.SIDM_LAHIRI)
@@ -59,31 +61,42 @@ RASHI_LORDS = {
 }
 
 CAREER_MAP = {
-    "Surya": "Sarkari naukri, Prashashanik seva (Administration), Management, Medical, Neta ya Uccha pad.",
-    "Chandra": "Jal se jude karya, Hotel/Restaurant, Travel, Nursing, Dairy, Kavi ya Sahitya.",
-    "Mangal": "Engineering, Technical karya, Police/Fauj, Defense, Real Estate, Property, Electrical ya Fire safety.",
-    "Budh": "Vyapar (Business), Banking, Finance, Accounting, IT/Software, Bhasha/Writing, Media ya Dukandari.",
-    "Guru": "Shikshak (Teacher), Professor, Vakeel/Kanoon, Jyotish, Financial Advisor, Temple/Trust ya Research.",
-    "Shukra": "Fashion, Beauty Products, Interior Designing, Media, Acting, Hotel Management, Luxury goods ya Gold/Jewelry.",
-    "Shani": "Vikas karya, Labor management, Machine/Factory, Iron/Hardware, Transport, Law ya Kheti/Krishi.",
-    "Rahu": "IT, Digital Marketing, Import-Export, Foreign Business, Media, Electronics ya Stock Market.",
-    "Ketu": "Software Programming, Research, Medical/Pharmacy, Healing, Spiritual karya ya Coding."
+    "Surya": "सरकारी नौकरी, प्रशासनिक सेवा (Administrative Services), मैनेजमेंट, मेडिकल/चिकित्सा, राजनीति, या किसी संस्था में उच्च नेतृत्व पद।",
+    "Chandra": "जल व तरल पदार्थों से जुड़े व्यवसाय, होटल/रेस्टोरेंट, ट्रैवल एवं टूरिज्म, नर्सिंग/स्वास्थ्य सेवा, डेयरी उद्योग, कला, साहित्य या लेखन।",
+    "Mangal": "इंजीनियरिंग, तकनीकी क्षेत्र (Technical Fields), पुलिस/सेना/डिफेंस, रियल एस्टेट, भूमि-भवन विकास, इलेक्ट्रिकल कार्य या सुरक्षा सेवाएं।",
+    "Budh": "व्यापार (Business), बैंकिंग, फाइनेंस, एकाउंटिंग, आईटी/सॉफ्टवेयर विकास, मीडिया, पत्रकारिता, भाषा/अनुवादक या खुदरा व थोक दुकानें।",
+    "Guru": "शिक्षक/प्रोफेसर, कानून व वकालत, वित्तीय परामर्शदाता (Financial Advisor), ज्योतिष, धार्मिक संस्थान/ट्रस्ट या रिसर्च व अकादमिक कार्य।",
+    "Shukra": "फैशन डिजाइनिंग, ब्यूटी व कॉस्मेटिक्स, इंटीरियर डिजाइनिंग, मीडिया, अभिनय/फिल्म, लग्जरी गुड्स, आभूषण एवं ज्वैलरी या हॉस्पिटैलिटी।",
+    "Shani": "निर्माण व विकास कार्य, लेबर/मानव संसाधन मैनेजमेंट, मशीनरी व फैक्टरी, लोहा/हार्डवेयर, ट्रांसपोर्टेशन, कानून या कृषि/खेती।",
+    "Rahu": "सूचना प्रौद्योगिकी (IT), डिजिटल मार्केटिंग, आयात-निर्यात (Import-Export), विदेश से जुड़े व्यापार, इलेक्ट्रॉनिक्स, या शेयर बाजार।",
+    "Ketu": "सॉफ्टवेयर प्रोग्रामिंग/कोडिंग, शोध कार्य (Research), फार्मास्युटिकल/दवाइयां, वैकल्पिक चिकित्सा, या आध्यात्मिक संस्थाएं।"
+}
+
+MAHADASHA_PREDICTIONS = {
+    "Surya": "सूर्य की महादशा में आत्मबल, आत्मविश्वास और सामाजिक मान-प्रतिष्ठा में वृद्धि होती है। इस समय सरकारी कार्यों, अधिकारियों से सहयोग और करियर में उच्च पद पाने के अवसर बनते हैं।",
+    "Chandra": "चंद्रमा की महादशा में मन में संवेदनशीलता और नए विचार आते हैं। यात्राओं के योग बनते हैं, पारिवारिक सुख और माता का सहयोग प्राप्त होता है। व्यापार व कला क्षेत्र में सफलता मिलती है।",
+    "Mangal": "मंगल की महादशा ऊर्जा, साहस, और निर्णय क्षमता बढ़ाती है। भूमि, मकान, संपत्ति और तकनीकी कार्यों में विशेष सफलता मिलती है। पराक्रम से नए अवसर प्राप्त होते हैं।",
+    "Budh": "बुध की महादशा में बुद्धि, व्यापारिक सोच, और संचार कौशल का विकास होता है। वित्तीय लाभ, नए व्यावसायिक सौदे, पठन-पाठन और तकनीकी/आईटी क्षेत्र में उत्तम परिणाम मिलते हैं।",
+    "Guru": "गुरु (बृहस्पति) की महादशा अत्यंत शुभ मानी जाती है। इसमें ज्ञान, धर्म, मान-सम्मान, विवाह, संतान सुख और आर्थिक समृद्धि में वृद्धि होती है। बड़ों और गुरुजनों का मार्गदर्शन प्राप्त होता है।",
+    "Shukra": "शुक्र की महादशा जीवन में भौतिक सुख-सुविधाएं, वाहन, मकान और आकर्षण लाती है। कला, सौंदर्य, विवाह, और रचनात्मक क्षेत्रों में बेहतरीन सफलता मिलती है।",
+    "Shani": "शनि की महादशा अनुशासन, धैर्य और कड़े परिश्रम की परीक्षा लेती है। इस दौरान निरंतर प्रयास से दीर्घकालिक और स्थायी सफलता प्राप्त होती है। व्यावहारिक अनुभवों से जीवन सुधरता है।",
+    "Rahu": "राहु की महादशा में जीवन में अचानक बड़े बदलाव आते हैं। नए और आधुनिक क्षेत्रों, आईटी, विदेश यात्रा, और लीक से हटकर किए गए कार्यों में बड़ी सफलता मिलने के योग बनते हैं।",
+    "Ketu": "केतु की महादशा में आध्यात्मिक झुकाव, अनुसंधान, और गूढ़ विषयों को सीखने का अवसर मिलता है। आत्म-विश्लेषण और तकनीकी/शोध कार्यों में विशेष प्रगति होती है।"
 }
 
 def section_heading(title, icon="✨"):
-    """Custom HTML Header Component"""
     st.markdown(
         f"""
         <div style="
-            background: linear-gradient(135deg, #8E0E00 0%, #1F1C1C 100%);
-            padding: 12px 20px;
+            background: linear-gradient(135deg, #4A0000 0%, #1A0000 100%);
+            padding: 14px 22px;
             border-radius: 10px;
-            margin-top: 25px;
-            margin-bottom: 15px;
+            margin-top: 28px;
+            margin-bottom: 18px;
             border-left: 6px solid #FFD700;
-            box-shadow: 0px 4px 10px rgba(0,0,0,0.15);
+            box-shadow: 0px 4px 12px rgba(0,0,0,0.3);
         ">
-            <h3 style="color: #FFD700; margin:0; padding:0; font-family: sans-serif; font-weight: 700;">
+            <h3 style="color: #FFD700; margin:0; padding:0; font-family: 'Segoe UI', sans-serif; font-weight: 700; font-size: 20px;">
                 {icon} {title}
             </h3>
         </div>
@@ -92,7 +105,6 @@ def section_heading(title, icon="✨"):
     )
 
 def get_navamsha_sign(abs_degree):
-    """Calculates D9 Navamsha sign index (0-11)"""
     abs_degree = abs_degree % 360
     d1_sign = int(abs_degree // 30)
     sign_degree = abs_degree % 30
@@ -111,7 +123,6 @@ def get_navamsha_sign(abs_degree):
 
 
 def render_north_indian_chart(asc_sign, planet_signs, title):
-    """Renders a North Indian Kundli chart using Matplotlib."""
     fig, ax = plt.subplots(figsize=(5, 5))
 
     ax.plot([0, 1, 1, 0, 0], [0, 0, 1, 1, 0], color="maroon", lw=2)
@@ -144,12 +155,11 @@ def render_north_indian_chart(asc_sign, planet_signs, title):
 
 st.set_page_config(page_title="Jyotish AI - A1 महा जन्मपत्री", page_icon="🔱", layout="wide")
 
-# Main Title Styling
 st.markdown(
     """
-    <div style="text-align: center; background: linear-gradient(90deg, #4b1248 0%, #F0C27B 100%); padding: 20px; border-radius: 12px; margin-bottom: 25px;">
-        <h1 style="color: #FFFFFF; font-size: 32px; font-weight: 800; margin:0;">🔱 JYOTISH AI — सम्पूर्ण महा जन्मपत्री</h1>
-        <p style="color: #FFF8DC; font-size: 16px; margin-top: 5px;">Vedic Astrology Engine | सटीक कुंडली, ग्रह विश्लेषण एवं विस्तृत फलादेश</p>
+    <div style="text-align: center; background: linear-gradient(90deg, #3A0007 0%, #8A1C1C 50%, #3A0007 100%); padding: 25px; border-radius: 12px; border-bottom: 4px solid #FFD700; margin-bottom: 25px; box-shadow: 0px 4px 15px rgba(0,0,0,0.3);">
+        <h1 style="color: #FFD700; font-size: 34px; font-weight: 800; margin:0;">🔱 JYOTISH AI — सम्पूर्ण महा जन्मपत्री</h1>
+        <p style="color: #FFF8DC; font-size: 16px; margin-top: 8px;">Vedic Astrology Engine | ऑटो-टाइमज़ोन, सटीक कुंडली व सम्पूर्ण भाग्यफल</p>
     </div>
     """,
     unsafe_allow_html=True
@@ -162,20 +172,33 @@ with col_a:
     name = st.text_input("Name / नाम", value="", placeholder="अपना नाम लिखें")
     gender = st.selectbox("Gender / लिंग", ["Male (पुरुष)", "Female (महिला)", "Other (अन्य)"])
     dob = st.date_input("Date of birth / जन्म तिथि", value=None, min_value=date(1900, 1, 1))
-    bt = st.time_input("Birth time / जन्म समय", value=None)
+    
+    st.write("**Birth Time / जन्म समय (AM / PM के साथ):**")
+    t_col1, t_col2, t_col3 = st.columns(3)
+    with t_col1:
+        hour12 = st.number_input("Hour (घंटा)", min_value=1, max_value=12, value=1)
+    with t_col2:
+        minute = st.number_input("Minute (मिनट)", min_value=0, max_value=59, value=0)
+    with t_col3:
+        ampm = st.selectbox("AM / PM", ["AM (सुबह/रात)", "PM (दोपहर/शाम)"])
 
 with col_b:
-    place = st.text_input("Birth place & Country / जन्म स्थान व देश", value="", placeholder="जैसे: Kathmandu Nepal, Delhi India, London UK")
-    utc_offset = st.number_input("Timezone Offset from UTC (Hours)", value=5.75, step=0.25, help="Nepal: +5.75, India: +5.5")
+    place = st.text_input("Birth place & Country / जन्म स्थान व देश", value="", placeholder="जैसे: Dang Nepal, Delhi India, London UK, New York USA")
 
-submitted = st.button("🚀 Generate Full A1 Report / सम्पूर्ण महा-रिपोर्ट देखें", type="primary")
+submitted = st.button("🚀 Generate Full A1 Detailed Report / सम्पूर्ण महा-रिपोर्ट देखें", type="primary")
 
 if submitted:
-    if not name or not dob or not bt or not place:
+    if not name or not dob or not place:
         st.warning("कृपया सभी विवरण (नाम, लिंग, जन्म तिथि, समय और जन्म स्थान) भरें!")
     else:
         try:
-            geolocator = Nominatim(user_agent="jyotish_app_v4")
+            # Convert 12-hour AM/PM to 24-hour time
+            hour24 = hour12 % 12
+            if "PM" in ampm:
+                hour24 += 12
+            bt = time(hour24, minute)
+
+            geolocator = Nominatim(user_agent="jyotish_app_v8")
             location = geolocator.geocode(place)
 
             if not location:
@@ -183,13 +206,24 @@ if submitted:
             else:
                 lat = location.latitude
                 lon = location.longitude
-                st.success(f"📍 स्थान मिला: **{location.address}**")
 
-                local_dt = datetime.combine(dob, bt)
+                # Automatically detect Timezone and UTC Offset from location
+                tf = TimezoneFinder()
+                tz_str = tf.timezone_at(lng=lon, lat=lat)
                 
-                offset_hours = int(utc_offset)
-                offset_minutes = int((utc_offset - offset_hours) * 60)
-                utc_dt = local_dt - timedelta(hours=offset_hours, minutes=offset_minutes)
+                if tz_str:
+                    tz_obj = zoneinfo.ZoneInfo(tz_str)
+                    local_dt_naive = datetime.combine(dob, bt)
+                    local_dt_aware = local_dt_naive.replace(tzinfo=tz_obj)
+                    utc_offset_hours = local_dt_aware.utcoffset().total_seconds() / 3600.0
+                    utc_dt = local_dt_aware.astimezone(zoneinfo.ZoneInfo("UTC"))
+                else:
+                    tz_str = "UTC Offset (+5.75 Default)"
+                    utc_offset_hours = 5.75
+                    local_dt_naive = datetime.combine(dob, bt)
+                    utc_dt = local_dt_naive - timedelta(hours=5, minutes=45)
+
+                st.success(f"📍 स्थान मिला: **{location.address}** | ऑटो टाइमज़ोन: **{tz_str} (UTC {utc_offset_hours:+.2f} hrs)** | दर्ज समय: **{hour12}:{minute:02d} {ampm[:2]}**")
 
                 jd = swe.julday(
                     utc_dt.year,
@@ -207,7 +241,6 @@ if submitted:
                 d1_planet_signs = {}
                 d9_planet_signs = {}
                 planet_positions_map = {}
-                moon_sign_idx = 0
 
                 for planet, code in PLANETS.items():
                     result, _ = swe.calc_ut(jd, code, flags)
@@ -222,10 +255,6 @@ if submitted:
                     nak_index = int(degree / (360 / 27))
 
                     planet_positions_map[planet] = sign_index
-
-                    if planet == "Chandra":
-                        moon_sign_idx = sign_index
-
                     d9_sign_index = get_navamsha_sign(degree)
 
                     rows.append({
@@ -283,40 +312,93 @@ if submitted:
                     st.pyplot(fig_d9)
                     plt.close(fig_d9)
 
-                # 3. DYNAMIC CAREER PREDICTIONS
-                section_heading("3. ग्रहों के अनुसार उपयुक्त करियर एवं बिज़नेस दिशा", "💼")
+                # 3. DASHA TIMELINE & PREDICTIONS
+                section_heading("3. महादशा एवं अंतर्दशा का विस्तृत फलादेश (Dasha Predictions)", "⏳")
+
+                moon_result, _ = swe.calc_ut(jd, swe.MOON, flags)
+                moon_degree = moon_result[0] % 360
+                nak_span = 360.0 / 27.0
+                moon_nak_idx = int(moon_degree / nak_span)
+
+                deg_in_nak = moon_degree % nak_span
+                balance_fraction = 1.0 - (deg_in_nak / nak_span)
+
+                first_md_lord_idx = moon_nak_idx % 9
+                first_md_lord = DASHA_LORDS[first_md_lord_idx]
+                first_md_years = DASHA_YEARS[first_md_lord]
+                remaining_first_md_years = first_md_years * balance_fraction
+
+                now_dt = datetime.now()
+                all_md_rows = []
+                current_start_date = local_dt_naive
+                active_md = ""
+
+                for m_idx in range(9):
+                    md_lord_i = (first_md_lord_idx + m_idx) % 9
+                    md_name = DASHA_LORDS[md_lord_i]
+                    md_total_years = DASHA_YEARS[md_name]
+
+                    md_duration_years = remaining_first_md_years if m_idx == 0 else md_total_years
+                    md_end_date = current_start_date + timedelta(days=md_duration_years * 365.25)
+
+                    is_active = current_start_date <= now_dt <= md_end_date
+                    if is_active:
+                        active_md = md_name
+
+                    all_md_rows.append({
+                        "महादशा (Mahadasha)": md_name,
+                        "प्रारंभ तिथि": current_start_date.strftime("%Y-%m-%d"),
+                        "समाप्ति तिथि": md_end_date.strftime("%Y-%m-%d"),
+                        "अवधि (वर्ष)": round(md_duration_years, 2),
+                        "स्थिति": "🔥 वर्तमान में सक्रिय" if is_active else "-"
+                    })
+                    current_start_date = md_end_date
+
+                st.dataframe(all_md_rows, use_container_width=True)
+
+                if active_md:
+                    with st.expander(f"🌟 वर्तमान सक्रिय महादशा: {active_md} का विस्तृत फलादेश", expanded=True):
+                        st.write(f"• **महादशा प्रभाव:** {MAHADASHA_PREDICTIONS.get(active_md, 'यह कालखंड आपके जीवन में नए बदलाव लेकर आएगा।')}")
+
+                # 4. AGE-WISE PREDICTIONS
+                section_heading("4. जीवन कालखंड अनुसार अति-विस्तृत महा-फलादेश", "🔮")
+
+                with st.expander("🎓 20 से 30 वर्ष की आयु: शिक्षा, कौशल विकास एवं आजीविका का निर्माण", expanded=True):
+                    st.write("""
+                    • **करियर एवं कार्यक्षेत्र का निर्माण:** जीवन का यह दशक आपके भविष्य की सबसे मजबूत नींव रखता है। 23 से 26 वर्ष की आयु के बीच करियर में पहला बड़ा और सकारात्मक अवसर प्राप्त होता है।
+                    • **आर्थिक स्थिति:** शुरुआती वर्षों में कड़ी मेहनत के बाद 26 वर्ष की आयु से आर्थिक स्थिति में स्पष्ट स्थिरता आने लगेगी।
+                    """)
+
+                with st.expander("💍 25 से 35 वर्ष की आयु: विवाह, दांपत्य जीवन एवं पारिवारिक जिम्मेदारियां", expanded=True):
+                    st.write("""
+                    • **विवाह एवं दांपत्य सुख:** इस कालखंड में विवाह के अत्यंत सुंदर और मजबूत योग बनते हैं। जीवनसाथी समझदार और व्यावहारिक मिलता है।
+                    • **भाग्योदय:** विवाह के पश्चात् आपके जीवन में भाग्योदय की गति तेज़ होगी और सामाजिक प्रतिष्ठा में वृद्धि होगी।
+                    """)
+
+                with st.expander("🏢 35 से 50 वर्ष की आयु: स्व-अर्जित संपत्ति, अचल संपत्ति एवं स्थायी सफलता", expanded=True):
+                    st.write("""
+                    • **भूमि, भवन एवं संपत्ति योग:** अपनी मेहनत और अनुभव के बल पर स्वयं का मकान, जमीन या संपत्ति बनाने के प्रबल योग बनते हैं।
+                    • **व्यापारिक स्थायित्व:** 35 वर्ष की आयु के बाद स्वतंत्र रूप से कार्य संभालने में अधिक सफलता मिलेगी।
+                    """)
+
+                # 5. CAREER & MARRIAGE
+                section_heading("5. ग्रहों के अनुसार उपयुक्त करियर एवं विवाह फलादेश", "💼")
 
                 karma_sign_idx = (asc_sign + 9) % 12
                 karma_lord = RASHI_LORDS[karma_sign_idx]
-                planets_in_10th = [p for p, s_idx in planet_positions_map.items() if s_idx == karma_sign_idx]
 
-                with st.expander("💼 आपके लिए कौन-सा काम/बिज़नेस सबसे उत्तम रहेगा?", expanded=True):
-                    st.write(f"• **दशम भाव (कर्म स्थान) राशि:** `{SIGNS[karma_sign_idx]}` ({SIGNS_HI[karma_sign_idx]})")
-                    st.write(f"• **कर्मेश (10th Lord):** `{karma_lord}`")
-                    st.write(f"• **मुख्य स्वामी ग्रह के अनुसार उपयुक्त क्षेत्र:** {CAREER_MAP.get(karma_lord, 'व्यापार व स्वतंत्र रोजगार')}")
-
-                    if planets_in_10th:
-                        st.write("• **दशम भाव में स्थित ग्रहों के आधार पर अतिरिक्त लाभप्रद कार्य:**")
-                        for p in planets_in_10th:
-                            st.write(f"  - **{p}:** {CAREER_MAP.get(p, 'स्वतंत्र व्यवसाय')}")
-
-                # 4. GENDER SPECIFIC MARRIAGE PREDICTIONS
-                section_heading("4. लिंग अनुसार विवाह एवं जीवनसाथी विश्लेषण", "💍")
+                with st.expander("💼 आपके लिए उपयुक्त काम/बिज़नेस", expanded=True):
+                    st.write(f"• **कर्मेश ({karma_lord}) के अनुसार उपयुक्त क्षेत्र:** {CAREER_MAP.get(karma_lord, 'व्यापार व स्वतंत्र रोजगार')}")
 
                 partner_label = "पत्नी (Wife)" if "Male" in gender else "पति (Husband)"
                 marriage_sign_idx = (asc_sign + 6) % 12
                 marriage_lord = RASHI_LORDS[marriage_sign_idx]
 
                 with st.expander(f"💍 {gender} विशेष — विवाह एवं {partner_label} का स्वभाव", expanded=True):
-                    st.write(f"• **सप्तम भाव (विवाह स्थान) राशि:** `{SIGNS[marriage_sign_idx]}` ({SIGNS_HI[marriage_sign_idx]}) | **सप्तमेश:** `{marriage_lord}`")
-                    
-                    if "Female" in gender:
-                        st.write("• **पति का स्वभाव व कारकत्व (Guru & 7th House):** महिला जातकों के लिए बृहस्पति (Guru) और सप्तम भाव पति के सुख का मुख्य कारक होता है। आपका पति समझदार, जिम्मेदार और परिवार का ध्यान रखने वाला होगा।")
-                    else:
-                        st.write("• **पत्नी का स्वभाव व कारकत्व (Shukra & 7th House):** पुरुष जातकों के लिए शुक्र (Shukra) और सप्तम भाव पत्नी के सुख का मुख्य कारक होता है। आपकी पत्नी सुलझी हुई, व्यावहारिक और भाग्य में वृद्धि करने वाली होगी।")
+                    st.write(f"• **सप्तमेश ({marriage_lord}) का प्रभाव:** जीवनसाथी समझदार, व्यावहारिक और परिवार की जिम्मेदारी उठाने वाला/वाली होगा/होगी।")
 
-                # 5. ALL 12 HOUSES ANALYSIS
-                section_heading("5. समस्त 12 भावों का गहन फलादेश", "🏛️")
+                # 6. ALL 12 HOUSES ANALYSIS
+                section_heading("6. समस्त 12 भावों का अति-विस्तृत फलादेश", "🏛️")
 
                 house_details = [
                     ("प्रथम भाव (तनु भाव)", "व्यक्तित्व, शारीरिक सौष्ठव, आत्मबल, विचार और स्वास्थ्य का प्रतिनिधित्व करता है।"),
@@ -327,24 +409,4 @@ if submitted:
                     ("षष्ठ भाव (रिपु भाव)", "प्रतिस्पर्धा, दैनिक कार्यशैली, ऋण और बाधाओं से निपटने का भाव है।"),
                     ("सप्तम भाव (जाया भाव)", "वैवाहिक जीवन, जीवनसाथी का स्वभाव, साझेदारी और सामाजिक संबंध का भाव है।"),
                     ("अष्टम भाव (आयु भाव)", "आयु, अचानक होने वाले परिवर्तन, शोध और गुप्त विद्याओं का स्थान है।"),
-                    ("नवम भाव (भाग्य भाव)", "भाग्योदय, धार्मिक आस्था, उच्च विचार और बड़ों के मार्गदर्शन का भाव है।"),
-                    ("दशम भाव (कर्म भाव)", "करियर, आजीविका, सामाजिक पद-प्रतिष्ठा और अधिकारों का मुख्य केंद्र है।"),
-                    ("एकदश भाव (लाभ भाव)", "आय के स्रोत, वित्तीय लाभ, मित्रों का सहयोग और मनोकामना पूर्ति का भाव है।"),
-                    ("द्वादश भाव (व्यय भाव)", "विदेश/दूरस्थ स्थानों से संबंध, खर्चे, आत्म-साक्षात्कार और बचत का भाव है।")
-                ]
-
-                for house_num in range(1, 13):
-                    h_sign_idx = (asc_sign + house_num - 1) % 12
-                    h_sign_name = SIGNS[h_sign_idx]
-                    h_lord = RASHI_LORDS[h_sign_idx]
-                    planets_here = [p for p, s_idx in planet_positions_map.items() if s_idx == h_sign_idx]
-                    h_title, h_desc = house_details[house_num - 1]
-
-                    with st.expander(f"📍 {house_num}. {h_title} — राशि: {h_sign_name} ({SIGNS_HI[h_sign_idx]})", expanded=False):
-                        st.write(f"• **भाव का महत्व:** {h_desc}")
-                        st.write(f"• **भाव स्वामी (House Lord):** `{h_lord}`")
-                        st.write(f"• **स्थित ग्रह:** `{', '.join(planets_here) if planets_here else 'खाली भाव (कोई ग्रह नहीं)'}`")
-
-        except Exception as e:
-            st.error(f"Calculation error: {e}")
-    
+                    ("नवम भाव (भाग्य भाव)",
