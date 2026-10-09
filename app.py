@@ -1,7 +1,22 @@
 import streamlit as st
 import swisseph as swe
 from datetime import datetime, timedelta, date, time
+SIGNS = [
+    "Mesh", "Vrishabh", "Mithun", "Kark",
+    "Singh", "Kanya", "Tula", "Vrishchik",
+    "Dhanu", "Makar", "Kumbh", "Meen"
+]
 
+NAKSHATRAS = [
+    "Ashwini", "Bharani", "Krittika", "Rohini",
+    "Mrigashira", "Ardra", "Punarvasu", "Pushya",
+    "Ashlesha", "Magha", "Purva Phalguni",
+    "Uttara Phalguni", "Hasta", "Chitra", "Swati",
+    "Vishakha", "Anuradha", "Jyeshtha", "Mula",
+    "Purva Ashadha", "Uttara Ashadha", "Shravana",
+    "Dhanishta", "Shatabhisha", "Purva Bhadrapada",
+    "Uttara Bhadrapada", "Revati"
+]
 PLANETS = {
     "Chandra": swe.MOON,
     "Mangal": swe.MARS,
