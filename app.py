@@ -179,7 +179,7 @@ if submitted:
                 "Rashi": sign_name,
                 "Grah": planets_here if planets_here else "-"
             })
-                hindi_planets = {
+            hindi_planets = {
             "Surya": "Surya",
             "Chandra": "Chandra",
             "Mangal": "Mangal",
