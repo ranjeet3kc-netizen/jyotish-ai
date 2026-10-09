@@ -146,7 +146,18 @@ if submitted:
 
         st.dataframe(house_rows, use_container_width=True)
                 # North Indian D1 Kundli - Rashi placement
-        st.subheader("D1 Janam Kundli")
+        st.subheader("D1 Janam Kundli")     
+        hindi_planets = {
+            "Surya": "सूर्य",
+            "Chandra": "चंद्र",
+            "Mangal": "मंगल",
+            "Budh": "बुध",
+            "Guru": "गुरु",
+            "Shukra": "शुक्र",
+            "Shani": "शनि",
+            "Rahu": "राहु",
+            "Ketu": "केतु"
+        }
 
         planet_signs = {}
 
