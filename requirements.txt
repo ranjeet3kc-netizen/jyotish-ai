@@ -4,3 +4,4 @@ matplotlib
 uharfbuzz
 geopy
 timezonefinder
+fpdf2
