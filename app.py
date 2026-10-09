@@ -171,8 +171,9 @@ if submitted:
             sign_index = (asc_sign + i) % 12
             sign_name = SIGNS[sign_index]
             planets_here = ", ".join(
-                planet_signs.get(sign_name, [])
-            )
+            hindi_planets.get(p, p)
+            for p in planet_signs.get(sign_name, [])
+                        )
 
             chart_rows.append({
                 "Bhav": i + 1,
