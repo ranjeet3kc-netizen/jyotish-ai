@@ -243,4 +243,4 @@ if submitted:
 
     except Exception as e:
         st.error(f"Calculation error: {e}")
-        
+
