@@ -91,20 +91,20 @@ MAHADASHA_PREDICTIONS = {
 # ---------------------------------------------------------------
 # Helper functions
 # ---------------------------------------------------------------
+
 def get_navamsha_sign(abs_degree):
     abs_degree = abs_degree % 360
     d1_sign = int(abs_degree // 30)
-    navamsha_num = int((abs_degree % 30) // (30 / 9))
-    if d1_sign in (0, 4, 8):      # fire
-        start = 0
-    elif d1_sign in (1, 5, 9):    # earth
-        start = 9
-    elif d1_sign in (2, 6, 10):   # air
-        start = 6
-    else:                         # water
-        start = 3
-    return (start + navamsha_num) % 12
+    navamsha_num = int((abs_degree % 30) / (30.0 / 9.0))
 
+    if d1_sign in (0, 3, 6, 9):
+        start = d1_sign
+    elif d1_sign in (1, 4, 7, 10):
+        start = (d1_sign + 8) % 12
+    else:
+        start = (d1_sign + 4) % 12
+
+    return (start + navamsha_num) % 12
 
 def antardashas(md_lord, md_start):
     """Full 9 antardashas of a mahadasha. md_start must be the *true* start
