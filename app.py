@@ -453,7 +453,7 @@ if submitted:
 
                 moon_res = swe.calc_ut(jd, swe.MOON, flags)
                 moon_degree = moon_res[0][0] % 360
-                nak_span = 360.0 / 27.0
+                moon_sign_idx = int(moon_degree // 30)
                 moon_nak_idx = int(moon_degree / nak_span)
 
                 deg_in_nak = moon_degree % nak_span
