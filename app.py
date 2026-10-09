@@ -2,6 +2,19 @@ import streamlit as st
 import swisseph as swe
 from datetime import datetime, timedelta, date, time, timezone
 import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
+import os
+
+font_paths = [
+    "/usr/share/fonts/truetype/noto/NotoSansDevanagari-Regular.ttf",
+    "/usr/share/fonts/truetype/noto/NotoSansDevanagariUI-Regular.ttf",
+]
+
+for font_path in font_paths:
+    if os.path.exists(font_path):
+        fm.fontManager.addfont(font_path)
+        plt.rcParams["font.family"] = fm.FontProperties(fname=font_path).get_name()
+        break
 from geopy.geocoders import Nominatim
 from timezonefinder import TimezoneFinder
 import zoneinfo
