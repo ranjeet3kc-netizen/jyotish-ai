@@ -217,7 +217,7 @@ def generate_pdf_report(name, dob_str, place_str, asc_sign_name, moon_sign_name,
     pdf.set_font("Helvetica", "I", 9)
     pdf.cell(0, 6, "Generated successfully by Jyotish AI Engine.", ln=True, align="C")
 
-    return pdf.output(dest='S').encode('latin1', 'replace')
+    return pdf.output()
     
                             
 # --- Page Setup ---
