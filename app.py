@@ -127,59 +127,54 @@ def section_heading(title, icon="✨"):
         unsafe_allow_html=True
     )
 
-def get_navamsha_sign(abs_degree):
-    abs_degree = abs_degree % 360
-    d1_sign = int(abs_degree // 30)
-    sign_degree = abs_degree % 30
-    navamsha_num = int(sign_degree // (30 / 9))
-
-    if d1_sign in [0, 4, 8]:
-        start_sign = 0
-    elif d1_sign in [1, 5, 9]:
-        start_sign = 9
-    elif d1_sign in [2, 6, 10]:
-        start_sign = 6
-    else:
-        start_sign = 3
-
-    return (start_sign + navamsha_num) % 12
-
 def render_north_indian_chart(asc_sign, planet_signs, title):
-    fig, ax = plt.subplots(figsize=(5, 5))
+    # चार्ट का साइज़ थोड़ा बेहतर किया ताकि टेक्स्ट साफ़ दिखे
+    fig, ax = plt.subplots(figsize=(6, 6))
 
+    # आउटर बॉक्स और डायमंड लाइनें (0 से 1 स्केल पर)
     ax.plot([0, 1, 1, 0, 0], [0, 0, 1, 1, 0], color="maroon", lw=2)
     ax.plot([0, 0.5, 1, 0.5, 0], [0.5, 1, 0.5, 0, 0.5], color="maroon", lw=1.5)
     ax.plot([0, 1], [0, 1], color="maroon", lw=1.5)
     ax.plot([0, 1], [1, 0], color="maroon", lw=1.5)
 
+    # 12 खानों के एकदम सटीक केंद्र बिंदु (Coordinates)
     positions = [
-        (0.50, 0.75), (0.25, 0.88), (0.12, 0.70),
-        (0.25, 0.50), (0.12, 0.30), (0.25, 0.12),
-        (0.50, 0.25), (0.75, 0.12), (0.88, 0.30),
-        (0.75, 0.50), (0.88, 0.70), (0.75, 0.88)
+        (0.50, 0.72), (0.25, 0.85), (0.15, 0.68),
+        (0.25, 0.50), (0.15, 0.32), (0.25, 0.15),
+        (0.50, 0.28), (0.75, 0.15), (0.85, 0.32),
+        (0.75, 0.50), (0.85, 0.68), (0.75, 0.85)
     ]
 
     for i, (x, y) in enumerate(positions):
+        # घर का नंबर (1 से 12) - यहाँ i=0 मतलब पहला घर (लग्न)
+        house_num = i + 1
         sign_index = (asc_sign + i) % 12
         planets_in_house = planet_signs.get(SIGNS[sign_index], [])
         
-        # ग्रहों के नाम ओवरलैप होने से बचाने के लिए छोटा फॉन्ट और फॉर्मेटिंग
-        if len(planets_in_house) > 2:
+        # अगर एक घर में ज़्यादा ग्रह हैं, तो उन्हें मैनेज करने का तरीका
+        if len(planets_in_house) > 3:
             p_str = ", ".join(planets_in_house[:2]) + "\n" + ", ".join(planets_in_house[2:])
-            font_size = 6.5
+            font_size = 6
+        elif len(planets_in_house) > 1:
+            p_str = ", ".join(planets_in_house)
+            font_size = 7
         else:
             p_str = "\n".join(planets_in_house) if planets_in_house else ""
             font_size = 7.5
 
-        ax.text(x, y + 0.05, f"{sign_index + 1}", color="darkred", fontsize=10, weight="bold", ha="center")
+        # घर के अंदर राशि/भाव नंबर दिखाना (ऊपर की तरफ)
+        ax.text(x, y + 0.08, f"H{house_num} [{SIGNS[sign_index][:3]}]", color="darkred", fontsize=8.5, weight="bold", ha="center")
+        
+        # ग्रहों के नाम दिखाना (नीचे की तरफ)
         if p_str:
-            ax.text(x, y - 0.06, p_str, color="navy", fontsize=font_size, ha="center")
+            ax.text(x, y - 0.04, p_str, color="navy", fontsize=font_size, ha="center", va="center")
 
-    ax.set_xlim(0, 1)
-    ax.set_ylim(0, 1)
+    ax.set_xlim(-0.05, 1.05)
+    ax.set_ylim(-0.05, 1.05)
     ax.axis("off")
-    ax.set_title(title, fontsize=12, pad=10, color="maroon", weight="bold")
+    ax.set_title(title, fontsize=13, pad=12, color="maroon", weight="bold")
     return fig
+    
     import io
 
 def generate_pdf_report(name, dob_str, place_str, asc_sign_name, moon_sign_name, active_md, active_ad, yoga_list, rows_data=None, fig_chart=None, dasha_rows=None):
