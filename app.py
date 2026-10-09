@@ -154,11 +154,11 @@ if submitted:
 
         st.dataframe(house_rows, use_container_width=True)
         
+                    st.info(
             "This is the first calculation module. "
             "Lagna, houses, Dasha and AI interpretation "
-            "are not implemented yet. Birth place coordinates "
-            "must be accurate."
-        )
+            "are not implemented yet. Birth place coordinates must be accurate."
+                    )
 
     except Exception as e:
         st.error(f"Calculation error: {e}")
