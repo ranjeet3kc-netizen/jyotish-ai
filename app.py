@@ -18,6 +18,7 @@ NAKSHATRAS = [
     "Uttara Bhadrapada", "Revati"
 ]
 PLANETS = {
+    "Surya": swe.SUN,
     "Chandra": swe.MOON,
     "Mangal": swe.MARS,
     "Budh": swe.MERCURY,
