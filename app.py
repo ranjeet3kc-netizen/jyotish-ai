@@ -145,7 +145,31 @@ if submitted:
             })
 
         st.dataframe(house_rows, use_container_width=True)
-        
+                # North Indian D1 Kundli - Rashi placement
+        st.subheader("D1 Janam Kundli")
+
+        planet_signs = {}
+
+        for row in rows:
+            planet_signs.setdefault(row["Rashi"], []).append(
+                row["Planet"]
+            )
+
+        chart_rows = []
+        for i in range(12):
+            sign_index = (asc_sign + i) % 12
+            sign_name = SIGNS[sign_index]
+            planets_here = ", ".join(
+                planet_signs.get(sign_name, [])
+            )
+
+            chart_rows.append({
+                "Bhav": i + 1,
+                "Rashi": sign_name,
+                "Grah": planets_here if planets_here else "-"
+            })
+
+        st.dataframe(chart_rows, use_container_width=True)
                 # Vimshottari Dasha - basic starting point
         st.subheader("Vimshottari Mahadasha")
 
