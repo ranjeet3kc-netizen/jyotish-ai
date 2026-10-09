@@ -47,7 +47,7 @@ with st.form("birth_form"):
     name = st.text_input("Name / नाम")
     dob = st.date_input(
         "Date of birth",
-        value=date(2000, 1, 1),
+        value=date(2000, 4, 15),
         min_value=date(1900, 1, 1)
     )
     bt = st.time_input(
