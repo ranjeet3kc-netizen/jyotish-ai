@@ -198,7 +198,7 @@ if submitted:
                 hour24 += 12
             bt = time(hour24, minute)
 
-            geolocator = Nominatim(user_agent="jyotish_app_v9")
+            geolocator = Nominatim(user_agent="jyotish_app_v10")
             location = geolocator.geocode(place)
 
             if not location:
@@ -243,9 +243,9 @@ if submitted:
                 planet_positions_map = {}
 
                 for planet, code in PLANETS.items():
-                    result, _ = swe.calc_ut(jd, code, flags)
-                    degree = result[0] % 360
-                    speed = result[3]
+                    res = swe.calc_ut(jd, code, flags)
+                    degree = res[0][0] % 360
+                    speed = res[0][3]
 
                     is_retro = speed < 0 and planet not in ["Surya", "Chandra", "Rahu"]
                     planet_display = f"{planet} (R)" if is_retro else planet
@@ -269,8 +269,8 @@ if submitted:
                     d1_planet_signs.setdefault(SIGNS[sign_index], []).append(planet_display)
                     d9_planet_signs.setdefault(SIGNS[d9_sign_index], []).append(planet_display)
 
-                rahu_res, _ = swe.calc_ut(jd, swe.MEAN_NODE, flags)
-                rahu_deg = rahu_res[0] % 360
+                rahu_res = swe.calc_ut(jd, swe.MEAN_NODE, flags)
+                rahu_deg = rahu_res[0][0] % 360
                 ketu_degree = (rahu_deg + 180) % 360
                 ketu_sign = int(ketu_degree // 30)
                 ketu_nak = int(ketu_degree / (360 / 27))
@@ -292,7 +292,9 @@ if submitted:
                 st.dataframe(rows, use_container_width=True)
 
                 # 2. CHARTS
-                cusps, ascmc = swe.houses_ex(jd, lat, lon, b'P', swe.FLG_SIDEREAL)
+                res_houses = swe.houses_ex(jd, lat, lon, b'P', swe.FLG_SIDEREAL)
+                cusps, ascmc = res_houses[0], res_houses[1]
+                
                 asc_degree = ascmc[0] % 360
                 asc_sign = int(asc_degree // 30)
                 d9_asc_sign = get_navamsha_sign(asc_degree)
@@ -315,8 +317,8 @@ if submitted:
                 # 3. DASHA TIMELINE & PREDICTIONS
                 section_heading("3. महादशा एवं अंतर्दशा का विस्तृत फलादेश (Dasha Predictions)", "⏳")
 
-                moon_result, _ = swe.calc_ut(jd, swe.MOON, flags)
-                moon_degree = moon_result[0] % 360
+                moon_res = swe.calc_ut(jd, swe.MOON, flags)
+                moon_degree = moon_res[0][0] % 360
                 nak_span = 360.0 / 27.0
                 moon_nak_idx = int(moon_degree / nak_span)
 
@@ -377,7 +379,7 @@ if submitted:
 
                 with st.expander("🏢 35 से 50 वर्ष की आयु: स्व-अर्जित संपत्ति, अचल संपत्ति एवं स्थायी सफलता", expanded=True):
                     st.write("""
-                    • **भूमि, भवन एवं संपत्ति योग:** अपनी मेहनत और अनुभव के बल पर स्वयं का मकान, जमीन या संपत्ति बनाने के प्रबल योग बनते हैं।
+                    • **भूमि, भवन एवं संपत्ति योग:** अपनी मेहनत और अनुभव केबल पर स्वयं का मकान, जमीन या संपत्ति बनाने के प्रबल योग बनते हैं।
                     • **व्यापारिक स्थायित्व:** 35 वर्ष की आयु के बाद स्वतंत्र रूप से कार्य संभालने में अधिक सफलता मिलेगी।
                     """)
 
@@ -401,7 +403,7 @@ if submitted:
                 section_heading("6. समस्त 12 भावों का अति-विस्तृत फलादेश", "🏛️")
 
                 house_details = [
-                    ("प्रथम भाव (तनु भाव)", " व्यक्तित्व, शारीरिक सौष्ठव, आत्मबल, विचार और स्वास्थ्य का प्रतिनिधित्व करता है।"),
+                    ("प्रथम भाव (तनु भाव)", "व्यक्तित्व, शारीरिक सौष्ठव, आत्मबल, विचार और स्वास्थ्य का प्रतिनिधित्व करता है।"),
                     ("द्वितीय भाव (धन भाव)", "कुटुंब, वाणी, प्रारंभिक शिक्षा, संचित धन और संपत्ति का भाव है।"),
                     ("तृतीय भाव (सहज भाव)", "पराक्रम, कार्यक्षमता, साहस, संचार और भाई-बहनों का स्थान है।"),
                     ("चतुर्थ भाव (सुख भाव)", "माता का सुख, घर का वातावरण, वाहन, भूमि और अचल संपत्ति का प्रतीक है।"),
@@ -409,7 +411,7 @@ if submitted:
                     ("षष्ठ भाव (रिपु भाव)", "प्रतिस्पर्धा, दैनिक कार्यशैली, ऋण और बाधाओं से निपटने का भाव है।"),
                     ("सप्तम भाव (जाया भाव)", "वैवाहिक जीवन, जीवनसाथी का स्वभाव, साझेदारी और सामाजिक संबंध का भाव है।"),
                     ("अष्टम भाव (आयु भाव)", "आयु, अचानक होने वाले परिवर्तन, शोध और गुप्त विद्याओं का स्थान है।"),
-                    ("नवम भाव (भाग्य भाव)" "भाग्योदय, धार्मिक आस्था, उच्च विचार और बड़ों के मार्गदर्शन का भाव है।"),
+                    ("नवम भाव (भाग्य भाव)", "भाग्योदय, धार्मिक आस्था, उच्च विचार और बड़ों के मार्गदर्शन का भाव है।"),
                     ("दशम भाव (कर्म भाव)", "करियर, आजीविका, सामाजिक पद-प्रतिष्ठा और अधिकारों का मुख्य केंद्र है।"),
                     ("एकदश भाव (लाभ भाव)", "आय के स्रोत, वित्तीय लाभ, मित्रों का सहयोग और मनोकामना पूर्ति का भाव है।"),
                     ("द्वादश भाव (व्यय भाव)", "विदेश/दूरस्थ स्थानों से संबंध, खर्चे, आत्म-साक्षात्कार और बचत का भाव है।")
