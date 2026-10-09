@@ -1,32 +1,5 @@
 import streamlit as st
-from datetime import date, time
-import swisseph as swe
 
-st.set_page_config(
-    page_title="Jyotish AI",
-    page_icon="🔱"
-)
-
-SIGNS = [
-    "Mesh", "Vrishabh", "Mithun", "Kark",
-    "Singh", "Kanya", "Tula", "Vrishchik",
-    "Dhanu", "Makar", "Kumbh", "Meen"
-]
-
-NAKSHATRAS = [
-    "Ashwini", "Bharani", "Krittika", "Rohini",
-    "Mrigashira", "Ardra", "Punarvasu", "Pushya",
-    "Ashlesha", "Magha", "Purva Phalguni",
-    "Uttara Phalguni", "Hasta", "Chitra",
-    "Swati", "Vishakha", "Anuradha", "Jyeshtha",
-    "Mula", "Purva Ashadha", "Uttara Ashadha",
-    "Shravana", "Dhanishta", "Shatabhisha",
-    "Purva Bhadrapada", "Uttara Bhadrapada",
-    "Revati"
-]
-
-PLANETS = {
-    "Surya": swe.SUN,
     "Chandra": swe.MOON,
     "Mangal": swe.MARS,
     "Budh": swe.MERCURY,
@@ -162,3 +135,4 @@ if submitted:
 
     except Exception as e:
         st.error(f"Calculation error: {e}")
+        
