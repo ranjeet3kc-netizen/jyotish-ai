@@ -130,7 +130,6 @@ if submitted:
         })
 
         st.dataframe(rows, use_container_width=True)
-        st.info(
         # Calculate Vedic Ascendant
         cusps, ascmc = swe.houses_ex(
             jd, lat, lon, b'P', swe.FLG_SIDEREAL
