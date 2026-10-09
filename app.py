@@ -110,9 +110,9 @@ def render_north_indian_chart(asc_sign, planet_signs, title):
     return fig
 
 
-st.set_page_config(page_title="Jyotish AI - महा जन्मपत्री", page_icon="🔱", layout="wide")
-st.title("🔱 Jyotish AI — महा जन्मपत्री एवं विस्तृत भाग्यफल")
-st.caption("Vedic Astrology | 12 भाव, 9 ग्रह एवं विस्तृत महादशा विश्लेषण")
+st.set_page_config(page_title="Jyotish AI - A1 महा जन्मपत्री", page_icon="🔱", layout="wide")
+st.title("🔱 Jyotish AI — A1 महा जन्मपत्री एवं अति-विस्तृत भाग्यफल")
+st.caption("Vedic Astrology | 12 भाव, 9 ग्रह, आयु-अनुसार फलादेश एवं वैदिक उपाय")
 
 st.header("Birth Details / जन्म विवरण दर्ज करें")
 
@@ -124,29 +124,27 @@ with col_a:
 
 with col_b:
     place = st.text_input("Birth place & Country / जन्म स्थान व देश", value="", placeholder="जैसे: Dang Nepal, Delhi India, London UK")
-    utc_offset = st.number_input("Timezone Offset from UTC (Hours) / समय क्षेत्र अंतर", value=5.75, step=0.25, help="Nepal: +5.75, India: +5.5, UK: 0, USA (NY): -5.0")
+    utc_offset = st.number_input("Timezone Offset from UTC (Hours)", value=5.75, step=0.25, help="Nepal: +5.75, India: +5.5")
 
-submitted = st.button("Generate Full Detailed Report / विस्तृत महा-रिपोर्ट जनरेट करें", type="primary")
+submitted = st.button("Generate Full A1 Report / सम्पूर्ण ए1 महा-रिपोर्ट देखें", type="primary")
 
 if submitted:
     if not name or not dob or not bt or not place:
         st.warning("कृपया सभी विवरण (नाम, जन्म तिथि, समय और जन्म स्थान) भरें!")
     else:
         try:
-            # Geocoding Place to get Lat/Lon automatically for ANY place in the world
-            geolocator = Nominatim(user_agent="jyotish_app")
+            geolocator = Nominatim(user_agent="jyotish_app_a1")
             location = geolocator.geocode(place)
 
             if not location:
-                st.error("जन्म स्थान नहीं मिल सका! कृपया स्थान और देश का नाम सही से लिखें (जैसे: Kathmandu Nepal, Delhi India)।")
+                st.error("जन्म स्थान नहीं मिल सका! कृपया स्थान और देश का नाम सही से लिखें।")
             else:
                 lat = location.latitude
                 lon = location.longitude
-                st.success(f"स्थान मिला: **{location.address}** (Lat: {round(lat, 4)}, Lon: {round(lon, 4)})")
+                st.success(f"स्थान मिला: **{location.address}**")
 
                 local_dt = datetime.combine(dob, bt)
                 
-                # Dynamic UTC conversion based on user-selected timezone offset
                 offset_hours = int(utc_offset)
                 offset_minutes = int((utc_offset - offset_hours) * 60)
                 utc_dt = local_dt - timedelta(hours=offset_hours, minutes=offset_minutes)
@@ -243,22 +241,44 @@ if submitted:
                     st.pyplot(fig_d9)
                     plt.close(fig_d9)
 
-                # 3. DETAILED 12 HOUSES ANALYSIS
-                st.subheader("3. समस्त 12 भावों का अति-विस्तृत फलादेश")
+                # 3. AGE-WISE FULL LIFE PREDICTIONS
+                st.subheader("3. जीवन कालखंड अनुसार अति-विस्तृत फलादेश (Age-wise Predictions)")
+
+                with st.expander("🎓 20 से 30 वर्ष की आयु: शिक्षा, हुनर एवं करियर की शुरुआत", expanded=True):
+                    st.write("""
+                    • **करियर एवं कार्यक्षेत्र:** यह दशक आपके जीवन में अपनी नींव मजबूत करने का है। यदि आप प्रैक्टिकल, टेक्निकल या व्यावहारिक काम (जैसे प्लंबिंग, इलेक्ट्रिकल, कंस्ट्रक्शन, या मैनेजमेंट) से जुड़े हैं, तो इस दौरान आपकी कार्यकुशलता में जबर्दस्त सुधार आएगा।
+                    • **आर्थिक प्रगति:** शुरुआत में मेहनत अधिक और फल थोड़ा धीमा मिल सकता है, लेकिन 24-25 वर्ष की आयु के बाद से आपकी आर्थिक स्थिति में स्थायित्व आने लगेगा।
+                    • **सलाह:** इस समय अपने हुनर और तकनीकी ज्ञान को बढ़ाने पर ध्यान दें, यही आगे चलकर आपकी मुख्य पहचान और धन का जरिया बनेगा।
+                    """)
+
+                with st.expander("💍 25 से 35 वर्ष की आयु: विवाह, जीवनसाथी एवं पारिवारिक जीवन", expanded=True):
+                    st.write("""
+                    • **विवाह एवं दांपत्य सुख:** इस कालखंड में विवाह के प्रबल योग बनते हैं। आपका जीवनसाथी समझदार, व्यावहारिक विचारों वाला/वाली और परिवार का सम्मान करने वाला होगा।
+                    • **पारिवारिक जिम्मेदारियां:** शादी के बाद आपके भाग्य में वृद्धि (भाग्योदय) होगी। जीवनसाथी के आने से आर्थिक फैसलों में सुधार आएगा और परिवार में आपका मान-सम्मान बढ़ेगा।
+                    """)
+
+                with st.expander("🏢 35 से 50 वर्ष की आयु: अचल संपत्ति, भवन निर्माण एवं स्थायी समृद्धि", expanded=True):
+                    st.write("""
+                    • **मकान व भूमि सुख:** इस अवधि में आपके पास अपनी खुद की अचल संपत्ति (मकान, जमीन या व्यावसायिक दुकान) बनाने के मजबूत योग हैं। 
+                    • **स्वतंत्र व्यापार व सफलता:** इस उम्र में आप दूसरों के अधीन काम करने के बजाय स्वतंत्र रूप से अपना काम या कॉन्ट्रैक्ट संभालेंगे। यह आपकी जिंदगी का सबसे समृद्ध दौर रहेगा।
+                    """)
+
+                # 4. ALL 12 HOUSES DETAILED ANALYSIS
+                st.subheader("4. समस्त 12 भावों का पूर्ण फलादेश (12 Bhav Complete Analysis)")
 
                 house_details = [
-                    ("प्रथम भाव (तनु भाव)", "व्यक्तित्व, शारीरिक गठन, आत्मबल, विचार और स्वास्थ्य का प्रतिनिधित्व करता है।"),
-                    ("द्वितीय भाव (धन भाव)", "कुटुंब, वाणी, प्रारंभिक शिक्षा, संचित धन और खान-पान का भाव है।"),
-                    ("तृतीय भाव (सहज भाव)", "पराक्रम, छोटे भाई-बहन, साहस, संचार माध्यम और व्यावहारिक हुनर का भाव है।"),
-                    ("चतुर्थ भाव (सुख भाव)", "माता का सुख, भूमि, अचल संपत्ति, भवन, वाहन और मानसिक शांति का प्रतीक है।"),
-                    ("पंचम भाव (पुत्र/बुद्धि भाव)", "उच्च शिक्षा, बुद्धि, संतान, पूर्व जन्म के पुण्य और निर्णय लेने की क्षमता का भाव है।"),
-                    ("षष्ठ भाव (रिपु भाव)", "प्रतिस्पर्धा, रोग, ऋण, शत्रु और दैनिक कार्यशैली का प्रतिनिधित्व करता है।"),
-                    ("सप्तम भाव (जाया भाव)", "विवाह, जीवनसाथी, साझेदारी, व्यापारिक संबंध और समाज में प्रतिष्ठा का भाव है।"),
-                    ("अष्टम भाव (आयु भाव)", "आयु, गुप्त ज्ञान, अचानक होने वाले लाभ/हानि, शोध और गूढ़ रहस्यों का भाव है।"),
-                    ("नवम भाव (भाग्य भाव)", "भाग्य, धर्म, गुरुजनों का मार्गदर्शन, उच्च ज्ञान और लंबी यात्राओं का भाव है।"),
-                    ("दशम भाव (कर्म भाव)", "करियर, कार्यक्षेत्र, सामाजिक प्रतिष्ठा, अधिकार और आजीविका का मुख्य स्थान है।"),
-                    ("एकदश भाव (लाभ भाव)", "आय के स्रोत, इच्छा पूर्ति, बड़े भाई-बहन और वित्तीय लाभ का प्रतीक है।"),
-                    ("द्वादश भाव (व्यय भाव)", "विदेश यात्रा, व्यय, मोक्ष, अस्पताल/एकांतवास और गुप्त शत्रुओं का भाव है।")
+                    ("प्रथम भाव (तनु भाव - व्यक्तित्व व स्वास्थ्य)", "आपका आत्मबल, शारीरिक बनावट, सोच और जीवन जीने की शैली का प्रतिनिधित्व करता है।"),
+                    ("द्वितीय भाव (धन भाव - संपत्ति व कुटुंब)", "पारिवारिक स्थिति, संचित धन, वाणी और दैनिक खान-पान का भाव है।"),
+                    ("तृतीय भाव (सहज भाव - पराक्रम व हुनर)", "आपके हाथों का हुनर, व्यावहारिक कार्यक्षमता, साहस और छोटे भाई-बहनों का स्थान है।"),
+                    ("चतुर्थ भाव (सुख भाव - भूमि व भवन)", "माता का सुख, घर का माहौल, अपनी गाड़ी, भूमि और अचल संपत्ति का प्रतीक है।"),
+                    ("पंचम भाव (बुद्धि भाव - निर्णय व संतान)", "आपकी सोचने की क्षमता, व्यावहारिक बुद्धि, शिक्षा और संतान का भाव है।"),
+                    ("षष्ठ भाव (रिपु भाव - शत्रु व प्रतिस्पर्धा)", "कामकाज में आने वाली बाधाएं, प्रतियोगिता, ऋण और स्वास्थ्य का भाव है।"),
+                    ("सप्तम भाव (जाया भाव - विवाह व साझेदारी)", "वैवाहिक जीवन, जीवनसाथी का स्वभाव, पार्टनरशिप और सामाजिक पहचान का भाव है।"),
+                    ("अष्टम भाव (आयु भाव - गुप्त ज्ञान व शोध)", "आयु, अचानक होने वाले बदलाव, पैतृक धन और गुप्त विद्याओं का स्थान है।"),
+                    ("नवम भाव (भाग्य भाव - धर्म व किस्मत)", "भाग्योदय का समय, धार्मिक विचार, लंबी यात्राएं और बड़ों के आशीर्वाद का भाव है।"),
+                    ("दशम भाव (कर्म भाव - करियर व पहचान)", "रोजगार, आजीविका, कार्यक्षेत्र में आपका पद और समाज में आपकी प्रतिष्ठा का मुख्य केंद्र है।"),
+                    ("एकदश भाव (लाभ भाव - आय व इच्छाएं)", "कमाई के स्रोत, आर्थिक लाभ, दोस्तों का सहयोग और मनोकामना पूर्ति का भाव है।"),
+                    ("द्वादश भाव (व्यय भाव - खर्च व बाहरी संबंध)", "घर से दूर/विदेश में काम, खर्चे, मानसिक शांति और बचत का भाव है।")
                 ]
 
                 for house_num in range(1, 13):
@@ -268,58 +288,22 @@ if submitted:
                     planets_here = [p for p, s_idx in planet_positions_map.items() if s_idx == h_sign_idx]
                     h_title, h_desc = house_details[house_num - 1]
 
-                    with st.expander(f"📍 {house_num}. {h_title} — राशि: {h_sign_name} ({SIGNS_HI[h_sign_idx]})", expanded=True):
+                    with st.expander(f"📍 {house_num}. {h_title} — राशि: {h_sign_name} ({SIGNS_HI[h_sign_idx]})", expanded=False):
                         st.write(f"• **भाव का महत्व:** {h_desc}")
                         st.write(f"• **भाव स्वामी (House Lord):** `{h_lord}`")
                         st.write(f"• **स्थित ग्रह:** `{', '.join(planets_here) if planets_here else 'खाली भाव (कोई ग्रह नहीं)'}`")
-                        st.write(f"• **विस्तृत विश्लेषण:** इस भाव में {SIGNS_HI[h_sign_idx]} राशि स्थित होने के कारण, स्वामी `{h_lord}` की स्थिति आपके जीवन के इस क्षेत्र में महत्वपूर्ण भूमिका निभाएगी।")
+                        st.write(f"• **गहन विश्लेषण:** इस भाव में {SIGNS_HI[h_sign_idx]} राशि स्थित होने से स्वामी `{h_lord}` आपके जीवन के इस पहलू को नियंत्रित करते हैं। यदि इस भाव में ग्रह मौजूद हैं, तो वे इस भाव के फलों में तेजी लाते हैं।")
 
-                # 4. ALL 9 PLANETS DETAILED ANALYSIS
-                st.subheader("4. नवग्रहों का स्थिति अनुसार विस्तृत विश्लेषण")
+                # 5. VEDIC REMEDIES & SUGGESTIONS
+                st.subheader("5. वैदिक उपाय एवं सरल समाधान (Vedic Remedies)")
 
-                for pl_name in PLANETS.keys():
-                    pl_sign_i = planet_positions_map[pl_name]
-                    pl_house = ((pl_sign_i - asc_sign) % 12) + 1
-                    with st.expander(f"🔮 {pl_name} — {pl_house}वें भाव में ({SIGNS[pl_sign_i]} राशि)", expanded=True):
-                        st.write(f"• **ग्रह स्थिति:** {pl_name} आपकी कुंडली के {pl_house}वें भाव में {SIGNS_HI[pl_sign_i]} राशि में विराजमान हैं।")
-
-                # 5. DASHA TIMELINE
-                st.subheader("5. विंशोत्तरी महादशा एवं अंतर्दशा विस्तृत टाइमलाइन")
-
-                moon_result, _ = swe.calc_ut(jd, swe.MOON, flags)
-                moon_degree = moon_result[0] % 360
-                nak_span = 360.0 / 27.0
-                moon_nak_idx = int(moon_degree / nak_span)
-
-                deg_in_nak = moon_degree % nak_span
-                balance_fraction = 1.0 - (deg_in_nak / nak_span)
-
-                first_md_lord_idx = moon_nak_idx % 9
-                first_md_lord = DASHA_LORDS[first_md_lord_idx]
-                first_md_years = DASHA_YEARS[first_md_lord]
-                remaining_first_md_years = first_md_years * balance_fraction
-
-                all_md_rows = []
-                current_start_date = local_dt
-
-                for m_idx in range(9):
-                    md_lord_i = (first_md_lord_idx + m_idx) % 9
-                    md_name = DASHA_LORDS[md_lord_i]
-                    md_total_years = DASHA_YEARS[md_name]
-
-                    md_duration_years = remaining_first_md_years if m_idx == 0 else md_total_years
-                    md_end_date = current_start_date + timedelta(days=md_duration_years * 365.25)
-
-                    all_md_rows.append({
-                        "महादशा (Mahadasha)": md_name,
-                        "प्रारंभ तिथि": current_start_date.strftime("%Y-%m-%d"),
-                        "समाप्ति तिथि": md_end_date.strftime("%Y-%m-%d"),
-                        "अवधि (वर्ष)": round(md_duration_years, 2)
-                    })
-                    current_start_date = md_end_date
-
-                st.dataframe(all_md_rows, use_container_width=True)
+                with st.expander("🌿 ग्रह शांति एवं भाग्यवृद्धि के मुख्य उपाय", expanded=True):
+                    st.write("""
+                    1. **लग्नेश को बल दें:** प्रतिदिन सूर्य देव को जल अर्पित करें और ओम् नमः शिवाय का जाप करें। इससे आपका आत्मविश्वास और स्वास्थ्य हमेशा मजबूत रहेगा।
+                    2. **कार्यक्षेत्र में सफलता हेतु:** शनिवार को हनुमान जी का दर्शन करें और पीपल के पेड़ के नीचे दिया जलाएं। इससे आपके कामों में आने वाली रुकावटें खत्म होंगी।
+                    3. **धन व भाग्योदय हेतु:** अपनी मां और घर के बड़े-बुजुर्गों का आशीर्वाद लें। मंगलवार को गुड़ या चने का दान करना आपके लिए अत्यंत शुभ रहेगा।
+                    """)
 
         except Exception as e:
             st.error(f"Calculation error: {e}")
-                
+                    
