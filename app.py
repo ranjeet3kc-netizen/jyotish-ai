@@ -179,7 +179,67 @@ if submitted:
                 "Rashi": sign_name,
                 "Grah": planets_here if planets_here else "-"
             })
+        hindi_planets = {
+            "Surya": "सूर्य",
+            "Chandra": "चंद्र",
+            "Mangal": "मंगल",
+            "Budh": "बुध",
+            "Guru": "गुरु",
+            "Shukra": "शुक्र",
+            "Shani": "शनि",
+            "Rahu": "राहु",
+            "Ketu": "केतु"
+        }
 
+        st.subheader("D1 जन्म कुंडली — उत्तर भारतीय शैली")
+
+        import matplotlib.pyplot as plt
+        from matplotlib.patches import Polygon
+
+        fig, ax = plt.subplots(figsize=(7, 7))
+
+        # Outer square
+        ax.plot(
+            [0, 1, 1, 0, 0],
+            [0, 0, 1, 1, 0],
+            color="black"
+        )
+
+        # Diamond and diagonal house boundaries
+        ax.plot([0, 0.5, 1, 0.5, 0],
+                [0.5, 1, 0.5, 0, 0.5], color="black")
+        ax.plot([0, 1], [0, 1], color="black")
+        ax.plot([0, 1], [1, 0], color="black")
+
+        # North Indian house positions
+        positions = [
+            (0.5, 0.77), (0.25, 0.88), (0.12, 0.67),
+            (0.25, 0.5), (0.12, 0.3), (0.25, 0.12),
+            (0.5, 0.23), (0.75, 0.12), (0.88, 0.3),
+            (0.75, 0.5), (0.88, 0.67), (0.75, 0.88)
+        ]
+
+        for i, (x, y) in enumerate(positions):
+            sign_index = (asc_sign + i) % 12
+            sign_name = SIGNS[sign_index]
+            grah = [
+                hindi_planets.get(row["Planet"], row["Planet"])
+                for row in rows
+                if row["Rashi"] == sign_name
+            ]
+
+            ax.text(
+                x, y,
+                f"{i+1} भाव\n{sign_name}\n" +
+                ("\n".join(grah) if grah else "—"),
+                ha="center", va="center", fontsize=9
+            )
+
+        ax.set_xlim(0, 1)
+        ax.set_ylim(0, 1)
+        ax.axis("off")
+        st.pyplot(fig)
+        plt.close(fig)
         st.dataframe(chart_rows, use_container_width=True)
                 # Vimshottari Dasha - basic starting point
         st.subheader("Vimshottari Mahadasha")
