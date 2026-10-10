@@ -401,7 +401,7 @@ def render_north_indian_chart(asc_sign, planet_signs, title):
         elif len(pl) > 1:
             p_str, fs = ", ".join(pl), 7
         else:
-            p_str, fs = ("\n".join(pl) if pl else ""), 7.5
+                        p_str, fs = ("\n".join(pl) if pl else ""), 7.5
         ax.text(x, y + 0.08, f"H{i + 1} [{SIGNS[sign_index][:3]}]",
                 color="darkred", fontsize=8.5, weight="bold", ha="center")
         if p_str:
@@ -518,7 +518,7 @@ def compute_report(name, dob, bt, place):
             "lord": lord, "start": shown_start.strftime("%Y-%m-%d"),
             "end": md_end.strftime("%Y-%m-%d"),
             "years": round(first_remaining if i == 0 else full, 2),
-            "active": is_active,
+            "active": is_active, "true_start": md_start,
         })
         md_start = md_end
 
@@ -681,18 +681,50 @@ if r:
         else:
             st.success("वर्तमान में साढ़ेसाती या शनि ढैया नहीं है।")
 
-    section_heading("6. महादशा एवं अंतर्दशा (Dasha Analysis)", "⏳")
-    st.markdown(f"**वर्तमान दशा:** {r['active_md']} महादशा — {r['active_ad']} अंतर्दशा")
+    section_heading("6. महादशा एवं अंतर्दशा का विस्तृत फलादेश (Dasha Analysis)", "⏳")
+    st.markdown(f"### वर्तमान दशा: **{GRAHA_HI.get(r['active_md'], r['active_md'])} महादशा — "
+                f"{GRAHA_HI.get(r['active_ad'], r['active_ad'])} अंतर्दशा**")
     st.dataframe(
         [{"महादशा": m["lord"], "प्रारंभ": m["start"], "समाप्ति": m["end"],
           "अवधि (वर्ष)": m["years"], "स्थिति": "🔥 वर्तमान में सक्रिय" if m["active"] else "-"}
          for m in r["md_rows"]],
         use_container_width=True,
     )
-    if r["active_md"]:
-        st.info(MAHADASHA_PREDICTIONS[r["active_md"]])
-        st.write(f"**{r['active_md']} महादशा की अंतर्दशाएँ:**")
-        st.dataframe(r["ad_rows"], use_container_width=True)
+
+    md_labels = [f"{GRAHA_HI[m['lord']]} महादशा ({m['start']} से {m['end']})"
+                 + (" 🔥 वर्तमान" if m["active"] else "") for m in r["md_rows"]]
+    default_i = next((i for i, m in enumerate(r["md_rows"]) if m["active"]), 0)
+    pick = st.selectbox("कोई भी महादशा चुनकर उसका विस्तृत फल पढ़ें:", range(len(md_labels)),
+                        index=default_i, format_func=lambda i: md_labels[i], key="md_pick")
+    sel = r["md_rows"][pick]
+    sel_md = sel["lord"]
+
+    st.markdown(f"## 🔱 {GRAHA_HI[sel_md]} महादशा का विस्तृत फल")
+    for title, text in md_reading(sel_md, r):
+        st.markdown(f"#### {title}")
+        st.write(text)
+
+    st.markdown(f"## 🔹 {GRAHA_HI[sel_md]} महादशा की सभी अंतर्दशाएँ")
+    now_naive = datetime.now(timezone.utc).replace(tzinfo=None)
+    ad_list = antardashas(sel_md, sel["true_start"])
+    st.dataframe(
+        [{"अंतर्दशा": GRAHA_HI[ad], "प्रारंभ": a_s.strftime("%Y-%m-%d"),
+          "समाप्ति": a_e.strftime("%Y-%m-%d"),
+          "स्थिति": "🔥 सक्रिय" if a_s <= now_naive < a_e else "-"}
+         for ad, a_s, a_e in ad_list],
+        use_container_width=True,
+    )
+    st.caption("हर अंतर्दशा पर क्लिक करके उसका पूरा विस्तृत फल पढ़ें।")
+    for ad, a_s, a_e in ad_list:
+        is_now = a_s <= now_naive < a_e
+        label = (f"{GRAHA_HI[sel_md]} - {GRAHA_HI[ad]} अंतर्दशा "
+                 f"({a_s.strftime('%d-%m-%Y')} से {a_e.strftime('%d-%m-%Y')})"
+                 + (" 🔥 वर्तमान" if is_now else ""))
+        with st.expander(label, expanded=is_now):
+            for title, text in ad_reading(sel_md, ad, r):
+                st.markdown(f"**{title}**")
+                st.write(text)
+    st.caption("यह फलादेश कुंडली के सामान्य ग्रह-नियमों पर आधारित है। वास्तविक फल अन्य योग, दृष्टि और गोचर पर भी निर्भर करता है।")
 
     section_heading("7. प्रमुख योग (Yogas)", "🌟")
     if r["yogas"]:
@@ -743,4 +775,4 @@ if r:
     for kind, txt in r["career"]:
         (st.success if kind == "good" else st.warning if kind == "warn" else st.info)(txt)
     st.caption("सभी फल कुंडली के सामान्य ग्रह-योगों पर आधारित हैं; निर्णय सोच-समझकर और योग्य सलाह से लें।")
-                 
+         
