@@ -238,7 +238,7 @@ tara_b = (nak_a - nak_b) % 9
 good_tara = {0, 1, 3, 5, 7}
 tara_score = 3 if tara_a in good_tara and tara_b in good_tara else 1.5 if tara_a in good_tara or tara_b in good_tara else 0
 
-    yoni_enemies = {
+yoni_enemies = {
         frozenset(("Horse", "Buffalo")), frozenset(("Elephant", "Lion")),
         frozenset(("Sheep", "Monkey")), frozenset(("Serpent", "Mongoose")),
         frozenset(("Dog", "Deer")), frozenset(("Cat", "Rat")),
