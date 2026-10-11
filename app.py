@@ -228,7 +228,7 @@ enemies = {
         "Mercury": {"Moon"}, "Jupiter": {"Mercury", "Venus"},
         "Venus": {"Sun", "Moon"}, "Saturn": {"Sun", "Moon", "Mars"},
     }
-    lord_a, lord_b = sign_lords[sign_a], sign_lords[sign_b]
+lord_a, lord_b = sign_lords[sign_a], sign_lords[sign_b]
 
     varna = [1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4]
     varna_score = 1 if varna[sign_a] == varna[sign_b] else 0
@@ -878,7 +878,7 @@ if r:
     pick = st.selectbox("कोई भी महादशा चुनकर उसका विस्तृत फल पढ़ें:", range(len(md_labels)), index=default_i, format_func=lambda i: md_labels[i])
     sel = r["md_rows"][pick]
     sel_md = sel["lord"]
-now_naive = datetime.now(timezone.utc).replace(tzinfo=None)
+    now_naive = datetime.now(timezone.utc).replace(tzinfo=None)
     ad_list = antardashas(sel_md, sel["true_start"])
     
     st.markdown(f"## 🔹 {GRAHA_HI[sel_md]} महादशा की सभी अंतर्दशाएँ")
