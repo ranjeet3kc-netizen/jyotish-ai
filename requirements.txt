@@ -1,8 +1,4 @@
-streamlit
-pyswisseph
-matplotlib
-uharfbuzz
-geopy
-timezonefinder
-fpdf2
-tzdata
+streamlit>=1.35,<2.0
+pyswisseph>=2.10.3
+geopy>=2.4
+timezonefinder>=6.5
