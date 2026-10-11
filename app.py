@@ -138,7 +138,7 @@ def get_varga_sign(abs_degree, varga):
         part = int((abs_degree % 30) // 0.5)
         return (rashi + part) % 12
     return rashi
-         def get_navamsha_sign(abs_degree):
+def get_navamsha_sign(abs_degree):
     return get_varga_sign(abs_degree, 9)
 
 def get_dashamsha_sign(abs_degree):
