@@ -228,9 +228,9 @@ enemies = {
         "Mercury": {"Moon"}, "Jupiter": {"Mercury", "Venus"},
         "Venus": {"Sun", "Moon"}, "Saturn": {"Sun", "Moon", "Mars"},
     }
-      lord_a, lord_b = sign_lords[sign_a], sign_lords[sign_b]
-      varna = [1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4]
-      varna_score = 1 if varna[sign_a] == varna[sign_b] else 0
+    lord_a, lord_b = sign_lords[sign_a], sign_lords[sign_b]
+    varna = [1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4]
+    varna_score = 1 if varna[sign_a] == varna[sign_b] else 0
 
     tara_a = (nak_b - nak_a) % 9
     tara_b = (nak_a - nak_b) % 9
