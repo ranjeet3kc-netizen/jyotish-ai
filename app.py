@@ -232,8 +232,8 @@ lord_a, lord_b = sign_lords[sign_a], sign_lords[sign_b]
 varna = [1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4]
 varna_score = 1 if varna[sign_a] == varna[sign_b] else 0
 
-    element = [0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3]
-    vashya_score = 2 if element[sign_a] == element[sign_b] else 1 if (element[sign_a] + element[sign_b]) % 2 == 0 else 0
+element = [0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3]
+vashya_score = 2 if element[sign_a] == element[sign_b] else 1 if (element[sign_a] + element[sign_b]) % 2 == 0 else 0
 
     tara_a = (nak_b - nak_a) % 9
     tara_b = (nak_a - nak_b) % 9
