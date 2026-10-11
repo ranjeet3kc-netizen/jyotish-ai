@@ -232,11 +232,11 @@ lord_a, lord_b = sign_lords[sign_a], sign_lords[sign_b]
 varna = [1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4]
 varna_score = 1 if varna[sign_a] == varna[sign_b] else 0
 
-    tara_a = (nak_b - nak_a) % 9
-    tara_b = (nak_a - nak_b) % 9
+tara_a = (nak_b - nak_a) % 9
+tara_b = (nak_a - nak_b) % 9
 
-    good_tara = {0, 1, 3, 5, 7}
-    tara_score = 3 if tara_a in good_tara and tara_b in good_tara else 1.5 if tara_a in good_tara or tara_b in good_tara else 0
+good_tara = {0, 1, 3, 5, 7}
+tara_score = 3 if tara_a in good_tara and tara_b in good_tara else 1.5 if tara_a in good_tara or tara_b in good_tara else 0
 
     yoni_enemies = {
         frozenset(("Horse", "Buffalo")), frozenset(("Elephant", "Lion")),
